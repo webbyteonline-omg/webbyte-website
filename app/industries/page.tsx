@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, X, Monitor, Sparkles, ExternalLink } from 'lucide-react'
+import { ArrowRight, CheckCircle2, X, Monitor } from 'lucide-react'
+import { newIndustries } from '@/lib/industries-data'
 
 interface Industry {
   slug:        string
@@ -19,7 +19,8 @@ interface Industry {
   features:    { icon: string; text: string }[]
 }
 
-const industries: Industry[] = [
+/* ── 8 flagship industries (custom demo pages already exist) ── */
+const flagshipIndustries: Industry[] = [
   {
     slug:        'restaurant',
     name:        'Restaurant & Cafe',
@@ -206,35 +207,41 @@ const industries: Industry[] = [
   },
 ]
 
-const comingSoon = [
-  { name: 'Dhaba / Cloud Kitchen', emoji: '🥘' }, { name: 'Bakery & Cafe', emoji: '☕' },
-  { name: 'Catering Service', emoji: '🍱' },       { name: 'Dental Clinic', emoji: '🦷' },
-  { name: 'Pharmacy', emoji: '💊' },               { name: 'Gym / Fitness', emoji: '💪' },
-  { name: 'Yoga Studio', emoji: '🧘' },            { name: 'Physiotherapy', emoji: '🩺' },
-  { name: 'Ayurveda Center', emoji: '🌿' },        { name: 'PG / Hostel', emoji: '🏠' },
-  { name: 'Travel Agency', emoji: '✈️' },           { name: 'Tour Operator', emoji: '🗺️' },
-  { name: 'School / College', emoji: '🏫' },       { name: 'Dance Academy', emoji: '💃' },
-  { name: 'Music School', emoji: '🎸' },           { name: 'Law Firm', emoji: '⚖️' },
-  { name: 'Architect', emoji: '📐' },              { name: 'Interior Designer', emoji: '🛋️' },
-  { name: 'Photographer', emoji: '📸' },           { name: 'Wedding Planner', emoji: '💒' },
-  { name: 'Event Management', emoji: '🎉' },       { name: 'Clothing Boutique', emoji: '👗' },
-  { name: 'Jewellery Shop', emoji: '💍' },         { name: 'Electronics Store', emoji: '📱' },
-  { name: 'Kirana / Grocery', emoji: '🛍️' },       { name: 'Builder / Developer', emoji: '🏗️' },
-  { name: 'Car Dealer', emoji: '🚗' },             { name: 'Bike Showroom', emoji: '🏍️' },
-  { name: 'Auto Service', emoji: '🔧' },           { name: 'Driving School', emoji: '🚦' },
-  { name: 'Packers & Movers', emoji: '📦' },       { name: 'Pest Control', emoji: '🐛' },
-  { name: 'Electrician / Plumber', emoji: '⚡' },   { name: 'Manufacturing', emoji: '🏭' },
-  { name: 'Import / Export', emoji: '🌐' },        { name: 'NGO / Trust', emoji: '🤝' },
-  { name: 'Tattoo Studio', emoji: '🎨' },          { name: 'Cab Service', emoji: '🚕' },
-]
+/* ── map newIndustries → Industry interface ── */
+const mappedNew: Industry[] = newIndustries.map(n => ({
+  slug:        n.slug,
+  name:        n.name,
+  emoji:       n.emoji,
+  image:       n.heroImage,
+  tagline:     n.tagline,
+  description: n.description,
+  color:       n.gradient,
+  textColor:   n.accentText,
+  price:       n.price,
+  delivery:    n.delivery,
+  badge:       n.badge ?? null,
+  features:    n.modalFeatures,
+}))
+
+const allIndustries = [...flagshipIndustries, ...mappedNew]
+
+/* ──────────────────────────────────────────────────────── */
 
 export default function IndustriesPage() {
-  const [selected,  setSelected]  = useState<Industry | null>(null)
-  const [demoOpen,  setDemoOpen]  = useState(false)
+  const [selected, setSelected] = useState<Industry | null>(null)
+  const [demoOpen, setDemoOpen] = useState(false)
+  const [search,   setSearch]   = useState('')
 
   const openModal = (ind: Industry) => { setSelected(ind); setDemoOpen(false) }
   const closeAll  = () => { setSelected(null); setDemoOpen(false) }
   const openDemo  = () => setDemoOpen(true)
+
+  const filtered = search.trim()
+    ? allIndustries.filter(i =>
+        i.name.toLowerCase().includes(search.toLowerCase()) ||
+        i.tagline.toLowerCase().includes(search.toLowerCase())
+      )
+    : allIndustries
 
   return (
     <div className="min-h-screen bg-white pt-16">
@@ -249,84 +256,114 @@ export default function IndustriesPage() {
           <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-8">
             Click your industry. See a live demo of exactly how your website will look. Then order in 5 minutes.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-5 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center justify-center gap-5 text-sm text-gray-500 mb-10">
             {['Live previews for every industry', 'Delivered in 7 days', 'Fixed price · No surprises'].map(t => (
               <div key={t} className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-green-500" /> {t}
               </div>
             ))}
           </div>
+          {/* Search */}
+          <div className="max-w-md mx-auto relative">
+            <input
+              type="text"
+              placeholder="Search your industry (e.g. gym, dental, bakery…)"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full border-2 border-purple-200 focus:border-purple-500 rounded-xl px-5 py-3 text-sm outline-none text-gray-700 bg-white"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg"
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Live Demo Cards */}
+      {/* Industry Cards */}
       <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <h2 className="text-2xl font-extrabold text-gray-900">Click any industry to preview</h2>
-          </div>
+          {search && (
+            <p className="text-sm text-gray-500 mb-6">
+              Showing {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "{search}"
+            </p>
+          )}
+          {!search && (
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <h2 className="text-2xl font-extrabold text-gray-900">
+                Click any industry to preview your demo
+              </h2>
+              <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                {allIndustries.length} industries
+              </span>
+            </div>
+          )}
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {industries.map((ind) => (
-              <button
-                key={ind.slug}
-                onClick={() => openModal(ind)}
-                className="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden text-left"
-              >
-                {ind.badge && (
-                  <div className="absolute top-3 right-3 z-10 bg-purple-700 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                    {ind.badge}
+          {filtered.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-5xl mb-4">🔍</div>
+              <h3 className="text-xl font-extrabold text-gray-900 mb-2">No match found</h3>
+              <p className="text-gray-500 mb-6">We build for any business — even if it's not listed here.</p>
+              <Link href="/order" className="btn-primary">Order Custom Website <ArrowRight className="w-4 h-4" /></Link>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {filtered.map((ind) => (
+                <button
+                  key={ind.slug}
+                  onClick={() => openModal(ind)}
+                  className="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden text-left"
+                >
+                  {ind.badge && (
+                    <div className="absolute top-3 right-3 z-10 bg-purple-700 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {ind.badge}
+                    </div>
+                  )}
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src={ind.image}
+                      alt={ind.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-3 left-3 text-2xl">{ind.emoji}</div>
                   </div>
-                )}
-                {/* Card image */}
-                <div className="relative h-36 overflow-hidden">
-                  <img
-                    src={ind.image}
-                    alt={ind.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-3 left-3 text-2xl">{ind.emoji}</div>
-                </div>
 
-                <div className="p-4">
-                  <h3 className="font-extrabold text-gray-900 mb-0.5">{ind.name}</h3>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ind.tagline}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-purple-700">{ind.price}</span>
-                    <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold group-hover:gap-2 transition-all">
-                      Preview <ArrowRight className="w-3.5 h-3.5" />
+                  <div className="p-4">
+                    <h3 className="font-extrabold text-gray-900 mb-0.5">{ind.name}</h3>
+                    <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ind.tagline}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-purple-700">{ind.price}</span>
+                      <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold group-hover:gap-2 transition-all">
+                        Preview <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </button>
-            ))}
-          </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Coming Soon */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center gap-3 mb-8">
-            <Sparkles className="w-5 h-5 text-purple-400" />
-            <h2 className="text-2xl font-extrabold text-gray-900">More Coming Soon</h2>
-            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded-full">{comingSoon.length}+ industries</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {comingSoon.map((ind) => (
-              <div key={ind.name} className="bg-white rounded-xl border border-gray-100 p-3 text-center opacity-60 hover:opacity-90 transition-opacity">
-                <div className="text-2xl mb-1.5">{ind.emoji}</div>
-                <div className="text-xs font-semibold text-gray-600 leading-tight">{ind.name}</div>
-                <div className="text-xs text-gray-400 mt-1">Soon</div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <p className="text-gray-500 mb-4">Don't see your industry? We build for any business.</p>
-            <Link href="/order" className="btn-primary">Order Custom Website <ArrowRight className="w-4 h-4" /></Link>
-          </div>
+      {/* Bottom CTA */}
+      <section className="py-14 bg-purple-50 text-center">
+        <div className="max-w-xl mx-auto px-4">
+          <div className="text-3xl mb-3">🏢</div>
+          <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
+            Don't see your industry?
+          </h2>
+          <p className="text-gray-500 mb-6 text-sm">
+            We build custom websites for any business in India. Tell us what you need and we'll show you a demo.
+          </p>
+          <Link href="/order" className="btn-primary">
+            Order Custom Website <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
@@ -341,7 +378,7 @@ export default function IndustriesPage() {
             onClick={e => e.stopPropagation()}
             style={{ maxHeight: '90vh', overflowY: 'auto' }}
           >
-            {/* Modal header with image */}
+            {/* Modal header */}
             <div className="relative h-48 overflow-hidden">
               <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" />
               <div className={`absolute inset-0 bg-gradient-to-br ${selected.color} opacity-80`} />
@@ -415,7 +452,7 @@ export default function IndustriesPage() {
       {/* ─── DEMO IFRAME OVERLAY ─── */}
       {selected && demoOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4">
-          {/* Browser chrome toolbar */}
+          {/* Browser chrome */}
           <div className="w-full max-w-6xl bg-gray-100 rounded-t-2xl px-4 py-3 flex items-center gap-3 border-b border-gray-200">
             <div className="flex gap-1.5">
               <button onClick={closeAll} className="w-3.5 h-3.5 bg-red-400 rounded-full hover:bg-red-500 transition-colors" />
@@ -425,17 +462,14 @@ export default function IndustriesPage() {
             <div className="flex-1 bg-white rounded-lg px-3 py-1.5 text-xs text-gray-500 border border-gray-200 font-mono">
               webbyte.online/industries/{selected.slug} — Demo Preview
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setDemoOpen(false)}
                 className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 transition-colors"
               >
                 ← Back to Details
               </button>
-              <button
-                onClick={closeAll}
-                className="text-gray-400 hover:text-gray-700 transition-colors"
-              >
+              <button onClick={closeAll} className="text-gray-400 hover:text-gray-700 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
