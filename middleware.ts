@@ -28,6 +28,10 @@ export async function middleware(req: NextRequest) {
     return NextResponse.rewrite(url, { request: { headers: reqHeaders } })
   }
 
+  // Expose pathname so layout.tsx can suppress chrome on demo pages
+  const reqHeaders = new Headers(req.headers)
+  reqHeaders.set('x-pathname', pathname)
+
   // ── MAIN DOMAIN — protect client routes ─────────────────────────────────────
   const protectedPaths = ['/dashboard', '/orders', '/profile']
   if (protectedPaths.some(p => pathname.startsWith(p))) {
@@ -40,7 +44,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  return NextResponse.next()
+  return NextResponse.next({ request: { headers: reqHeaders } })
 }
 
 export const config = {

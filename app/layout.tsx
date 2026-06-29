@@ -46,17 +46,23 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const h       = await headers()
-  const isAdmin = h.get('x-is-admin') === '1'
+  const h        = await headers()
+  const isAdmin  = h.get('x-is-admin') === '1'
+  const pathname = h.get('x-pathname') || ''
+
+  // Industry demo pages (/industries/restaurant, /industries/dhaba, etc.)
+  // must render bare — no site Navbar / Footer / WhatsApp overlay
+  const isDemoPage = /^\/industries\/.+/.test(pathname)
+  const showChrome = !isAdmin && !isDemoPage
 
   return (
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          {!isAdmin && <Navbar />}
+          {showChrome && <Navbar />}
           <main>{children}</main>
-          {!isAdmin && <Footer />}
-          {!isAdmin && <WhatsAppButton />}
+          {showChrome && <Footer />}
+          {showChrome && <WhatsAppButton />}
           <Toaster position="top-right" toastOptions={{ className: 'text-sm font-medium' }} />
         </AuthProvider>
       </body>
