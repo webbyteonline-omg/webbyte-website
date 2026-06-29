@@ -1,8 +1,9 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, X, Monitor } from 'lucide-react'
+import { ArrowRight, CheckCircle2, X, Monitor, Globe, Receipt } from 'lucide-react'
 import { newIndustries } from '@/lib/industries-data'
+import { billingData } from '@/lib/billing-data'
 
 interface Industry {
   slug:        string
@@ -225,16 +226,24 @@ const mappedNew: Industry[] = newIndustries.map(n => ({
 
 const allIndustries = [...flagshipIndustries, ...mappedNew]
 
+type Section = 'websites' | 'billing'
+
 /* ──────────────────────────────────────────────────────── */
 
 export default function IndustriesPage() {
-  const [selected, setSelected] = useState<Industry | null>(null)
-  const [demoOpen, setDemoOpen] = useState(false)
-  const [search,   setSearch]   = useState('')
+  const [section,        setSection]  = useState<Section>('websites')
+  const [selected,       setSelected] = useState<Industry | null>(null)
+  const [demoOpen,       setDemoOpen] = useState(false)
+  const [search,         setSearch]   = useState('')
+  const [billingSelected, setBillingSelected] = useState<typeof billingData[0] | null>(null)
+  const [billingDemoOpen, setBillingDemoOpen] = useState(false)
 
   const openModal = (ind: Industry) => { setSelected(ind); setDemoOpen(false) }
   const closeAll  = () => { setSelected(null); setDemoOpen(false) }
   const openDemo  = () => setDemoOpen(true)
+
+  const openBillingModal = (b: typeof billingData[0]) => { setBillingSelected(b); setBillingDemoOpen(false) }
+  const closeBillingAll  = () => { setBillingSelected(null); setBillingDemoOpen(false) }
 
   const filtered = search.trim()
     ? allIndustries.filter(i =>
@@ -247,98 +256,99 @@ export default function IndustriesPage() {
     <div className="min-h-screen bg-white pt-16">
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-purple-50 via-white to-white py-20">
+      <section className="bg-gradient-to-br from-purple-50 via-white to-white py-16">
         <div className="max-w-5xl mx-auto px-4 text-center">
-          <div className="badge mx-auto mb-4">50+ Business Types</div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-5 leading-tight">
-            See Your Website<br />Before You Order
+          <div className="badge mx-auto mb-4">50+ Business Demos</div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
+            See It Before You Order
           </h1>
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-8">
-            Click your industry. See a live demo of exactly how your website will look. Then order in 5 minutes.
+          <p className="text-lg text-gray-500 max-w-xl mx-auto mb-8">
+            Live demos for websites and billing software — click any business, preview exactly what you'll get.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-5 text-sm text-gray-500 mb-10">
-            {['Live previews for every industry', 'Delivered in 7 days', 'Fixed price · No surprises'].map(t => (
-              <div key={t} className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-green-500" /> {t}
-              </div>
-            ))}
+
+          {/* Section Toggle */}
+          <div className="inline-flex bg-gray-100 rounded-2xl p-1 mb-8">
+            <button
+              onClick={() => { setSection('websites'); setSearch('') }}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                section === 'websites'
+                  ? 'bg-white text-purple-700 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Globe className="w-4 h-4" /> Websites
+            </button>
+            <button
+              onClick={() => { setSection('billing'); setSearch('') }}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                section === 'billing'
+                  ? 'bg-white text-purple-700 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Receipt className="w-4 h-4" /> Billing & ERP
+            </button>
           </div>
-          {/* Search */}
-          <div className="max-w-md mx-auto relative">
-            <input
-              type="text"
-              placeholder="Search your industry (e.g. gym, dental, bakery…)"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full border-2 border-purple-200 focus:border-purple-500 rounded-xl px-5 py-3 text-sm outline-none text-gray-700 bg-white"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg"
-              >
-                ×
-              </button>
-            )}
-          </div>
+
+          {/* Search (websites only) */}
+          {section === 'websites' && (
+            <div className="max-w-md mx-auto relative">
+              <input
+                type="text"
+                placeholder="Search industry (e.g. gym, dental, bakery…)"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full border-2 border-purple-200 focus:border-purple-500 rounded-xl px-5 py-3 text-sm outline-none text-gray-700 bg-white"
+              />
+              {search && (
+                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg">×</button>
+              )}
+            </div>
+          )}
+
+          {section === 'billing' && (
+            <p className="text-sm text-gray-500">
+              Complete billing software with GST, inventory, POS & reports — for Indian businesses.
+            </p>
+          )}
         </div>
       </section>
 
-      {/* Industry Cards */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          {search && (
-            <p className="text-sm text-gray-500 mb-6">
-              Showing {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "{search}"
-            </p>
-          )}
-          {!search && (
+      {/* ── BILLING SECTION ── */}
+      {section === 'billing' && (
+        <section id="billing" className="py-12 bg-white">
+          <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <h2 className="text-2xl font-extrabold text-gray-900">
-                Click any industry to preview your demo
-              </h2>
-              <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                {allIndustries.length} industries
-              </span>
+              <h2 className="text-2xl font-extrabold text-gray-900">Click any software to preview</h2>
+              <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-full">{billingData.length} demos</span>
             </div>
-          )}
 
-          {filtered.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4">🔍</div>
-              <h3 className="text-xl font-extrabold text-gray-900 mb-2">No match found</h3>
-              <p className="text-gray-500 mb-6">We build for any business — even if it's not listed here.</p>
-              <Link href="/order" className="btn-primary">Order Custom Website <ArrowRight className="w-4 h-4" /></Link>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {filtered.map((ind) => (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+              {billingData.map(b => (
                 <button
-                  key={ind.slug}
-                  onClick={() => openModal(ind)}
-                  className="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden text-left"
+                  key={b.slug}
+                  onClick={() => openBillingModal(b)}
+                  className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all overflow-hidden"
                 >
-                  {ind.badge && (
-                    <div className="absolute top-3 right-3 z-10 bg-purple-700 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      {ind.badge}
-                    </div>
+                  {b.badge && (
+                    <div className="bg-purple-700 text-white text-xs font-bold px-2 py-0.5 rounded-br-xl absolute">{b.badge}</div>
                   )}
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src={ind.image}
-                      alt={ind.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-3 left-3 text-2xl">{ind.emoji}</div>
+                  {/* Gradient header */}
+                  <div className={`bg-gradient-to-br ${b.gradient} p-5 relative`}>
+                    <div className="text-3xl mb-2">{b.emoji}</div>
+                    <div className="font-extrabold text-white text-lg">{b.name}</div>
+                    <div className="text-white/75 text-xs mt-0.5">{b.tagline}</div>
+                    {b.badge && <div className="absolute top-3 right-3 bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full">{b.badge}</div>}
                   </div>
-
                   <div className="p-4">
-                    <h3 className="font-extrabold text-gray-900 mb-0.5">{ind.name}</h3>
-                    <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ind.tagline}</p>
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {b.features.slice(0, 3).map(f => (
+                        <span key={f.title} className="text-xs bg-gray-50 text-gray-600 border border-gray-100 rounded-full px-2.5 py-0.5">{f.icon} {f.title}</span>
+                      ))}
+                    </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-purple-700">{ind.price}</span>
+                      <span className="font-bold text-purple-700">{b.price}</span>
                       <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold group-hover:gap-2 transition-all">
                         Preview <ArrowRight className="w-3.5 h-3.5" />
                       </div>
@@ -347,25 +357,99 @@ export default function IndustriesPage() {
                 </button>
               ))}
             </div>
-          )}
-        </div>
-      </section>
 
-      {/* Bottom CTA */}
-      <section className="py-14 bg-purple-50 text-center">
-        <div className="max-w-xl mx-auto px-4">
-          <div className="text-3xl mb-3">🏢</div>
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
-            Don't see your industry?
-          </h2>
-          <p className="text-gray-500 mb-6 text-sm">
-            We build custom websites for any business in India. Tell us what you need and we'll show you a demo.
-          </p>
-          <Link href="/order" className="btn-primary">
-            Order Custom Website <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
+            {/* Billing features strip */}
+            <div className="bg-gradient-to-r from-purple-700 to-indigo-700 rounded-2xl p-6 text-white">
+              <h3 className="text-lg font-extrabold mb-4 text-center">Every Billing Software Includes</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-center text-xs">
+                {['⚡ Fast POS Billing', '📦 Inventory Mgmt', '🧾 GST Auto-calc', '💰 Credit / Udhaar', '📊 Daily Reports', '🖨️ Thermal Print'].map(f => (
+                  <div key={f} className="bg-white/10 rounded-xl p-2.5 font-semibold">{f}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Industry Cards + Bottom CTA (websites only) */}
+      {section === 'websites' && (
+        <>
+          <section className="py-12 bg-white">
+            <div className="max-w-6xl mx-auto px-4">
+              {search && (
+                <p className="text-sm text-gray-500 mb-6">
+                  Showing {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "{search}"
+                </p>
+              )}
+              {!search && (
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <h2 className="text-2xl font-extrabold text-gray-900">
+                    Click any industry to preview your demo
+                  </h2>
+                  <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                    {allIndustries.length} industries
+                  </span>
+                </div>
+              )}
+
+              {filtered.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="text-5xl mb-4">🔍</div>
+                  <h3 className="text-xl font-extrabold text-gray-900 mb-2">No match found</h3>
+                  <p className="text-gray-500 mb-6">We build for any business — even if it's not listed here.</p>
+                  <Link href="/order" className="btn-primary">Order Custom Website <ArrowRight className="w-4 h-4" /></Link>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {filtered.map((ind) => (
+                    <button
+                      key={ind.slug}
+                      onClick={() => openModal(ind)}
+                      className="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden text-left"
+                    >
+                      {ind.badge && (
+                        <div className="absolute top-3 right-3 z-10 bg-purple-700 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                          {ind.badge}
+                        </div>
+                      )}
+                      <div className="relative h-36 overflow-hidden">
+                        <img
+                          src={ind.image}
+                          alt={ind.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute bottom-3 left-3 text-2xl">{ind.emoji}</div>
+                      </div>
+
+                      <div className="p-4">
+                        <h3 className="font-extrabold text-gray-900 mb-0.5">{ind.name}</h3>
+                        <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ind.tagline}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-purple-700">{ind.price}</span>
+                          <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold group-hover:gap-2 transition-all">
+                            Preview <ArrowRight className="w-3.5 h-3.5" />
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Bottom CTA — websites */}
+          <section className="py-10 bg-purple-50 text-center">
+            <div className="max-w-xl mx-auto px-4">
+              <h2 className="text-xl font-extrabold text-gray-900 mb-2">Don't see your industry?</h2>
+              <p className="text-gray-500 mb-5 text-sm">We build custom websites for any business in India.</p>
+              <Link href="/order" className="btn-primary">Order Custom Website <ArrowRight className="w-4 h-4" /></Link>
+            </div>
+          </section>
+        </>
+      )}
 
       {/* ─── INDUSTRY DETAILS MODAL ─── */}
       {selected && !demoOpen && (
@@ -445,6 +529,143 @@ export default function IndustriesPage() {
                 48-hour refund if work hasn't started · Source code included · 1 month support
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── BILLING DETAILS MODAL ─── */}
+      {billingSelected && !billingDemoOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={closeBillingAll}
+        >
+          <div
+            className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}
+            style={{ maxHeight: '90vh', overflowY: 'auto' }}
+          >
+            {/* Header */}
+            <div className={`bg-gradient-to-br ${billingSelected.gradient} p-8 relative`}>
+              <div className="text-5xl mb-3">{billingSelected.emoji}</div>
+              <h2 className="text-2xl font-extrabold text-white">{billingSelected.shopName}</h2>
+              <p className="text-white/80 text-sm mt-1">{billingSelected.tagline}</p>
+              <button
+                onClick={closeBillingAll}
+                className="absolute top-4 right-4 w-8 h-8 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <p className="text-gray-600 text-sm leading-relaxed mb-6">{billingSelected.description}</p>
+
+              <h3 className="font-extrabold text-gray-900 mb-4">What's included in your software:</h3>
+              <div className="grid sm:grid-cols-2 gap-2.5 mb-6">
+                {billingSelected.modalFeatures.map((f, i) => (
+                  <div key={i} className="flex items-start gap-2.5 bg-gray-50 rounded-xl p-3">
+                    <span className="text-lg flex-shrink-0">{f.icon}</span>
+                    <span className="text-sm text-gray-700 leading-snug">{f.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Stats strip */}
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {billingSelected.stats.slice(0, 3).map((s, i) => (
+                  <div key={i} className="bg-purple-50 rounded-2xl p-3 text-center border border-purple-100">
+                    <div className="text-xl font-extrabold text-purple-700">{s.value}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Price */}
+              <div className="flex items-center gap-4 bg-purple-50 rounded-2xl p-4 mb-6 border border-purple-100">
+                <div className="flex-1">
+                  <div className="text-xs text-gray-500 mb-0.5">Starting from</div>
+                  <div className="text-3xl font-extrabold text-purple-700">{billingSelected.price}</div>
+                  <div className="text-xs text-gray-500">One-time · Source code included · No hidden fees</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-0.5">Setup</div>
+                  <div className="text-xl font-extrabold text-gray-900">7 days</div>
+                  <div className="text-xs text-gray-500">from order date</div>
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => setBillingDemoOpen(true)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-purple-700 hover:bg-purple-800 text-white font-bold px-5 py-3.5 rounded-xl transition-colors"
+                >
+                  <Monitor className="w-4 h-4" />
+                  Test Live Demo
+                </button>
+                <Link
+                  href="/order"
+                  className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-5 py-3.5 rounded-xl transition-colors"
+                  onClick={closeBillingAll}
+                >
+                  Order Now — {billingSelected.price} <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              <p className="text-xs text-center text-gray-400 mt-3">
+                48-hour refund if work hasn't started · Source code included · 1 month support
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── BILLING IFRAME OVERLAY ─── */}
+      {billingSelected && billingDemoOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+          {/* Browser chrome */}
+          <div className="w-full max-w-6xl bg-gray-100 rounded-t-2xl px-4 py-3 flex items-center gap-3 border-b border-gray-200">
+            <div className="flex gap-1.5">
+              <button onClick={closeBillingAll} className="w-3.5 h-3.5 bg-red-400 rounded-full hover:bg-red-500 transition-colors" />
+              <button onClick={() => setBillingDemoOpen(false)} className="w-3.5 h-3.5 bg-yellow-400 rounded-full hover:bg-yellow-500 transition-colors" />
+              <div className="w-3.5 h-3.5 bg-green-400 rounded-full" />
+            </div>
+            <div className="flex-1 bg-white rounded-lg px-3 py-1.5 text-xs text-gray-500 border border-gray-200 font-mono">
+              webbyte.online/billing/{billingSelected.slug} — Demo Preview
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setBillingDemoOpen(false)}
+                className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 transition-colors"
+              >
+                ← Back to Details
+              </button>
+              <button onClick={closeBillingAll} className="text-gray-400 hover:text-gray-700 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* iframe */}
+          <div className="w-full max-w-6xl bg-white rounded-b-2xl overflow-hidden shadow-2xl" style={{ height: 'calc(90vh - 52px)' }}>
+            <iframe
+              src={`/billing/${billingSelected.slug}`}
+              className="w-full h-full border-0"
+              title={`${billingSelected.name} Billing Demo`}
+            />
+          </div>
+
+          {/* Bottom strip */}
+          <div className="mt-3 flex items-center gap-4">
+            <span className="text-white/60 text-xs">This is a live demo of {billingSelected.name} billing software</span>
+            <Link
+              href="/order"
+              onClick={closeBillingAll}
+              className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1"
+            >
+              Order This Software — {billingSelected.price} <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       )}

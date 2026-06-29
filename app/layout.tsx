@@ -50,9 +50,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const isAdmin  = h.get('x-is-admin') === '1'
   const pathname = h.get('x-pathname') || ''
 
-  // Industry demo pages (/industries/restaurant, /industries/dhaba, etc.)
-  // must render bare — no site Navbar / Footer / WhatsApp overlay
-  const isDemoPage = /^\/industries\/.+/.test(pathname)
+  // Demo pages must render bare — no site Navbar / Footer / WhatsApp overlay
+  const isDemoPage = /^\/(industries|billing)\/.+/.test(pathname)
   const showChrome = !isAdmin && !isDemoPage
 
   return (
