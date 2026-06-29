@@ -6,10 +6,11 @@ import { useSession, signOut } from 'next-auth/react'
 import { Menu, X, ChevronDown, Globe, LogOut, User, LayoutDashboard, ShoppingBag } from 'lucide-react'
 
 const navLinks = [
-  { label: 'Home',      href: '/'          },
-  { label: 'Products',  href: '/products'  },
-  { label: 'Portfolio', href: '/portfolio' },
-  { label: 'Blog',      href: '/blog'      },
+  { label: 'Home',       href: '/'           },
+  { label: 'Industries', href: '/industries' },
+  { label: 'Products',   href: '/products'   },
+  { label: 'Portfolio',  href: '/portfolio'  },
+  { label: 'Blog',       href: '/blog'       },
 ]
 
 export default function Navbar() {
