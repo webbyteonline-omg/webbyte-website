@@ -4,10 +4,11 @@ import { ArrowRight, CheckCircle2, Star, Phone } from 'lucide-react'
 import DemoBanner from '@/components/DemoBanner'
 import { newIndustries } from '@/lib/industries-data'
 
-type Props = { params: { slug: string } }
+type Props = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const ind = newIndustries.find(i => i.slug === params.slug)
+  const { slug } = await params
+  const ind = newIndustries.find(i => i.slug === slug)
   if (!ind) return { title: 'Demo | WebByte' }
   return {
     title: `${ind.demoName} | WebByte Demo`,
@@ -19,8 +20,9 @@ export function generateStaticParams() {
   return newIndustries.map(i => ({ slug: i.slug }))
 }
 
-export default function IndustryDemoPage({ params }: Props) {
-  const ind = newIndustries.find(i => i.slug === params.slug)
+export default async function IndustryDemoPage({ params }: Props) {
+  const { slug } = await params
+  const ind = newIndustries.find(i => i.slug === slug)
 
   if (!ind) {
     return (
