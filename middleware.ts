@@ -1,22 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
+import crypto from 'crypto'
 import { getToken } from 'next-auth/jwt'
 
-const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!)
-
-async function verifyAdminToken(req: NextRequest) {
-  const token = req.cookies.get('admin_token')?.value
-  if (!token) return null
+function verifyAdminToken(token: string): { email: string; role: string } | null {
   try {
-    const { payload } = await jwtVerify(token, secret)
-    return payload as { id: string; email: string; role: string }
+    const [payload, sig] = token.split('.')
+    if (!payload || !sig) return null
+
+    const expected = crypto
+      .createHmac('sha256', process.env.NEXTAUTH_SECRET || 'fallback-secret')
+      .update(payload)
+      .digest('base64url')
+
+    const sigOk = crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+    if (!sigOk) return null
+
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString())
+    if (data.exp < Date.now()) return null   // expired
+
+    return data
   } catch {
     return null
   }
 }
 
 export async function middleware(req: NextRequest) {
-  const host      = req.headers.get('host') || ''
+  const host     = req.headers.get('host') || ''
   const { pathname } = req.nextUrl
 
   const isAdminSubdomain =
@@ -24,15 +33,15 @@ export async function middleware(req: NextRequest) {
     host === 'admin.webbyte.tech'   ||
     host.startsWith('admin.localhost')
 
-  // ── ADMIN SUBDOMAIN ────────────────────────────────────────────────────────
+  // ── ADMIN SUBDOMAIN ─────────────────────────────────────────────────────────
   if (isAdminSubdomain) {
-    // Always let API routes through (login endpoint, NextAuth, etc.)
+    // Always let API routes through
     if (pathname.startsWith('/api/')) return NextResponse.next()
 
-    const admin = await verifyAdminToken(req)
+    const cookie = req.cookies.get('admin_token')?.value
+    const admin  = cookie ? verifyAdminToken(cookie) : null
 
     if (!admin || admin.role !== 'ADMIN') {
-      // Not authenticated → redirect to admin login
       if (pathname !== '/admin/login') {
         const url = req.nextUrl.clone()
         url.pathname = '/admin/login'
@@ -41,7 +50,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next()
     }
 
-    // Authenticated ADMIN — if they hit /admin/login, send them to dashboard
+    // Already logged in → skip login page
     if (pathname === '/admin/login') {
       const url = req.nextUrl.clone()
       url.pathname = '/admin'
@@ -51,11 +60,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // ── MAIN DOMAIN — protect client routes with NextAuth ──────────────────────
+  // ── MAIN DOMAIN — protect client routes ─────────────────────────────────────
   const protectedPaths = ['/dashboard', '/orders', '/profile']
-  const isProtected    = protectedPaths.some(p => pathname.startsWith(p))
-
-  if (isProtected) {
+  if (protectedPaths.some(p => pathname.startsWith(p))) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
     if (!token) {
       const url = req.nextUrl.clone()
