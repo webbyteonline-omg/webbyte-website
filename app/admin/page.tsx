@@ -41,9 +41,9 @@ export default function AdminPage() {
   const [updating, setUpdating] = useState<string | null>(null)
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/login')
+    if (status === 'unauthenticated') router.push('/admin/login')
     if (status === 'authenticated' && (session?.user as any)?.role !== 'ADMIN') {
-      router.push('/dashboard')
+      router.push('/admin/login')
     }
   }, [status, session, router])
 
