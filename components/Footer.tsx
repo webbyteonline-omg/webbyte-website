@@ -9,10 +9,10 @@ const footerLinks = {
     { label: 'Order Now', href: '/order' },
   ],
   Company: [
-    { label: 'About Us', href: '/about' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Contact', href: '/contact' },
+    { label: 'About Us',  href: '/about'     },
+    { label: 'Portfolio', href: '/portfolio' },
+    { label: 'Blog',      href: '/blog'      },
+    { label: 'Careers',   href: '/careers'   },
   ],
   Support: [
     { label: 'Help Center', href: '/help' },

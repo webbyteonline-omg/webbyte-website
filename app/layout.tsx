@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import AuthProvider from '@/components/AuthProvider'
+import WhatsAppButton from '@/components/WhatsAppButton'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -55,6 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {!isAdmin && <Navbar />}
           <main>{children}</main>
           {!isAdmin && <Footer />}
+          {!isAdmin && <WhatsAppButton />}
           <Toaster position="top-right" toastOptions={{ className: 'text-sm font-medium' }} />
         </AuthProvider>
       </body>

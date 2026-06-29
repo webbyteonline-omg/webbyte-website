@@ -4,10 +4,9 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
 const schema = z.object({
-  name:     z.string().min(2),
-  email:    z.string().email(),
-  password: z.string().min(6),
-  phone:    z.string().optional(),
+  name:     z.string().min(2, 'Name must be at least 2 characters'),
+  phone:    z.string().min(10, 'Enter a valid phone number').max(15),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
   company:  z.string().optional(),
 })
 
@@ -16,27 +15,34 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const data = schema.parse(body)
 
-    const existing = await prisma.user.findUnique({ where: { email: data.email } })
+    // Check if phone already registered
+    const existing = await prisma.user.findFirst({ where: { phone: data.phone } })
     if (existing) {
-      return NextResponse.json({ error: 'Email already registered' }, { status: 400 })
+      return NextResponse.json({ error: 'This phone number is already registered. Please sign in.' }, { status: 409 })
     }
 
     const hashed = await bcrypt.hash(data.password, 12)
+
+    // Use synthetic email since Prisma adapter requires unique email
+    const syntheticEmail = `${data.phone}@webbyte.user`
+
     const user = await prisma.user.create({
       data: {
         name:     data.name,
-        email:    data.email,
-        password: hashed,
         phone:    data.phone,
+        email:    syntheticEmail,
+        password: hashed,
         company:  data.company,
+        role:     'CLIENT',
       },
     })
 
-    return NextResponse.json({ id: user.id, name: user.name, email: user.email }, { status: 201 })
+    return NextResponse.json({ id: user.id, name: user.name }, { status: 201 })
   } catch (err: any) {
     if (err.name === 'ZodError') {
-      return NextResponse.json({ error: 'Invalid input', details: err.errors }, { status: 422 })
+      return NextResponse.json({ error: err.errors[0]?.message || 'Invalid input' }, { status: 422 })
     }
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+    console.error('Register error:', err)
+    return NextResponse.json({ error: err.message || 'Registration failed' }, { status: 500 })
   }
 }

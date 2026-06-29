@@ -8,26 +8,27 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt' },
   pages: {
-    signIn: '/login',
-    error:  '/login',
+    signIn: '/signin',
+    error:  '/signin',
   },
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email:    { label: 'Email',    type: 'email' },
+        phone:    { label: 'Phone',    type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null
+        if (!credentials?.phone || !credentials.password) return null
 
-        const user = await prisma.user.findUnique({ where: { email: credentials.email } })
+        // Find user by phone number
+        const user = await prisma.user.findFirst({ where: { phone: credentials.phone } })
         if (!user || !user.password) return null
 
         const valid = await bcrypt.compare(credentials.password, user.password)
         if (!valid) return null
 
-        return { id: user.id, name: user.name, email: user.email, role: user.role }
+        return { id: user.id, name: user.name ?? '', email: user.email ?? '', role: (user as any).role }
       },
     }),
   ],
