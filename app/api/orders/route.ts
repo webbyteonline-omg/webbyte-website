@@ -24,11 +24,11 @@ const PRODUCTS: Record<string, { name: string; price: number }> = {
 }
 
 const razorpay = new Razorpay({
-  key_id:     process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+  key_id:     process.env.RAZORPAY_KEY_ID || 'dummy',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy',
 })
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-02-24.acacia' })
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'dummy', { apiVersion: '2025-02-24.acacia' })
 
 export async function POST(req: NextRequest) {
   try {
