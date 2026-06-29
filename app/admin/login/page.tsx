@@ -1,52 +1,47 @@
 'use client'
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Loader2, ShieldCheck, Eye, EyeOff } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const router = useRouter()
-  const [email,     setEmail]     = useState('')
-  const [password,  setPassword]  = useState('')
-  const [showPass,  setShowPass]  = useState(false)
-  const [loading,   setLoading]   = useState(false)
-  const [error,     setError]     = useState('')
+  const [email,    setEmail]    = useState('')
+  const [password, setPassword] = useState('')
+  const [showPass, setShowPass] = useState(false)
+  const [loading,  setLoading]  = useState(false)
+  const [error,    setError]    = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    const res = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
+    try {
+      const res = await fetch('/api/admin/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password }),
+      })
 
-    if (res?.error) {
-      setError('Invalid email or password.')
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Login failed.')
+        return
+      }
+
+      router.replace('/admin')
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
       setLoading(false)
-      return
     }
-
-    // Verify it's actually an ADMIN account
-    const meRes  = await fetch('/api/auth/session')
-    const meData = await meRes.json()
-
-    if (meData?.user?.role !== 'ADMIN') {
-      setError('Access denied. Admin accounts only.')
-      setLoading(false)
-      return
-    }
-
-    router.replace('/admin')
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 px-4">
       <div className="w-full max-w-md">
 
-        {/* Logo / Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur mb-4">
             <ShieldCheck className="w-8 h-8 text-white" />
@@ -57,7 +52,6 @@ export default function AdminLoginPage() {
           <p className="text-purple-300 text-sm mt-1">Restricted access — authorised personnel only</p>
         </div>
 
-        {/* Card */}
         <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -68,9 +62,7 @@ export default function AdminLoginPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-purple-200 mb-1.5">
-                Admin Email
-              </label>
+              <label className="block text-sm font-medium text-purple-200 mb-1.5">Admin Email</label>
               <input
                 type="email"
                 required
@@ -83,9 +75,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-purple-200 mb-1.5">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-purple-200 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPass ? 'text' : 'password'}
@@ -111,14 +101,7 @@ export default function AdminLoginPage() {
               disabled={loading}
               className="w-full py-3 rounded-xl bg-purple-500 hover:bg-purple-400 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Signing in…
-                </>
-              ) : (
-                'Sign In'
-              )}
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</> : 'Sign In'}
             </button>
           </form>
         </div>
