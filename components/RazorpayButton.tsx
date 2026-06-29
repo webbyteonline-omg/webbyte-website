@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Script from 'next/script'
 import toast from 'react-hot-toast'
 import { Loader2, CreditCard } from 'lucide-react'
@@ -38,6 +38,13 @@ export default function RazorpayButton({
 }: RazorpayButtonProps) {
   const [loading, setLoading] = useState(false)
   const [scriptReady, setScriptReady] = useState(false)
+
+  // If Razorpay script is already loaded (e.g. loaded by another instance), mark ready immediately
+  useEffect(() => {
+    if (typeof window !== 'undefined' && typeof window.Razorpay === 'function') {
+      setScriptReady(true)
+    }
+  }, [])
 
   const handlePayment = useCallback(async () => {
     if (!scriptReady) {
