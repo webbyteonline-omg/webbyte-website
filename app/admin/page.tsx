@@ -38,7 +38,7 @@ export default function AdminPage() {
   const fetchOrders = async () => {
     setLoading(true)
     try {
-      const res  = await fetch('/api/orders')
+      const res  = await fetch('/api/admin/orders')
       const json = await res.json()
       setOrders(json.orders || [])
     } catch (e) {
@@ -52,7 +52,7 @@ export default function AdminPage() {
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     setUpdating(orderId)
-    await fetch(`/api/orders/${orderId}`, {
+    await fetch(`/api/admin/orders/${orderId}`, {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ status: newStatus }),
