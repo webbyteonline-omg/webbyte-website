@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   Package, TrendingUp, CheckCircle2,
   Clock, RefreshCw, Filter, Loader2
@@ -31,19 +30,15 @@ const STATUS_STYLES: Record<string, string> = {
 }
 
 export default function AdminPage() {
-  const router  = useRouter()
   const [orders,   setOrders]   = useState<Order[]>([])
   const [loading,  setLoading]  = useState(true)
   const [filter,   setFilter]   = useState('ALL')
   const [updating, setUpdating] = useState<string | null>(null)
 
   const fetchOrders = async () => {
+    setLoading(true)
     try {
       const res  = await fetch('/api/orders')
-      if (res.status === 401 || res.status === 403) {
-        router.replace('/admin/login')
-        return
-      }
       const json = await res.json()
       setOrders(json.orders || [])
     } catch (e) {
@@ -54,11 +49,6 @@ export default function AdminPage() {
   }
 
   useEffect(() => { fetchOrders() }, [])
-
-  const logout = async () => {
-    await fetch('/api/admin/logout', { method: 'POST' })
-    router.replace('/admin/login')
-  }
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     setUpdating(orderId)
@@ -94,23 +84,18 @@ export default function AdminPage() {
             </h1>
             <p className="text-gray-500 text-sm">Order management panel</p>
           </div>
-          <div className="flex gap-3">
-            <button onClick={fetchOrders} className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm hover:border-purple-300 transition-colors">
-              <RefreshCw className="w-4 h-4" /> Refresh
-            </button>
-            <button onClick={logout} className="px-4 py-2 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100 transition-colors">
-              Logout
-            </button>
-          </div>
+          <button onClick={fetchOrders} className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm hover:border-purple-300 transition-colors">
+            <RefreshCw className="w-4 h-4" /> Refresh
+          </button>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Total Orders',   value: orders.length,                                                          icon: Package,     color: 'text-purple-600' },
-            { label: 'Pending',        value: orders.filter(o => o.status === 'PENDING').length,                      icon: Clock,       color: 'text-yellow-600' },
-            { label: 'Completed',      value: orders.filter(o => o.status === 'COMPLETED').length,                    icon: CheckCircle2,color: 'text-green-600'  },
-            { label: 'Revenue (Paid)', value: `₹${revenue.toLocaleString('en-IN')}`,                                  icon: TrendingUp,  color: 'text-blue-600'   },
+            { label: 'Total Orders',   value: orders.length,                                             icon: Package,      color: 'text-purple-600' },
+            { label: 'Pending',        value: orders.filter(o => o.status === 'PENDING').length,          icon: Clock,        color: 'text-yellow-600' },
+            { label: 'Completed',      value: orders.filter(o => o.status === 'COMPLETED').length,        icon: CheckCircle2, color: 'text-green-600'  },
+            { label: 'Revenue (Paid)', value: `₹${revenue.toLocaleString('en-IN')}`,                     icon: TrendingUp,   color: 'text-blue-600'   },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
               <div className="flex items-center gap-3">
@@ -134,9 +119,7 @@ export default function AdminPage() {
               key={s}
               onClick={() => setFilter(s)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                filter === s
-                  ? 'bg-purple-700 text-white'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'
+                filter === s ? 'bg-purple-700 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'
               }`}
             >
               {s.replace('_', ' ')}
@@ -204,6 +187,7 @@ export default function AdminPage() {
             )}
           </div>
         </div>
+
       </div>
     </div>
   )
