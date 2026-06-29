@@ -51,7 +51,7 @@ export default function Footer() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-gray-400">
                 <Mail className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                hello@webbyte.in
+                hello@webbyte.online
               </div>
               <div className="flex items-center gap-2 text-gray-400">
                 <Phone className="w-4 h-4 text-purple-400 flex-shrink-0" />

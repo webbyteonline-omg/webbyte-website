@@ -159,7 +159,7 @@ export default function HomePage() {
                       <div className="w-3 h-3 bg-green-400 rounded-full" />
                     </div>
                     <div className="flex-1 h-6 bg-gray-100 rounded-full px-3 flex items-center text-xs text-gray-400">
-                      webbyte.in
+                      webbyte.online
                     </div>
                   </div>
                   {/* Mock website preview */}

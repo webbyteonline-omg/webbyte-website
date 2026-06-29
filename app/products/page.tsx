@@ -251,7 +251,7 @@ export default function ProductsPage() {
             <Link href="/order" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-purple-700 font-bold rounded-xl hover:bg-purple-50 transition-colors">
               Place Order <ArrowRight className="w-5 h-5" />
             </Link>
-            <a href="mailto:hello@webbyte.in" className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors border border-white/20">
+            <a href="mailto:hello@webbyte.online" className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors border border-white/20">
               Email Us
             </a>
           </div>
