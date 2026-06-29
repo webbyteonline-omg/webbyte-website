@@ -1,24 +1,24 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Star, MapPin, Phone, ArrowRight, CheckCircle2, Wifi, Coffee, Car, Utensils } from 'lucide-react'
+import { Star, ArrowRight, CheckCircle2, Wifi, Coffee, Car } from 'lucide-react'
 import DemoBanner from '@/components/DemoBanner'
 
 export const metadata: Metadata = {
-  title: 'Hotel / Resort Website Demo | WebByte',
-  description: 'See how your hotel or resort website will look — with room booking, photo gallery, and packages.',
+  title: 'The Royal Palace Hotel | WebByte Demo',
+  description: 'Hotel website demo with room booking, photo gallery, packages, and online payments.',
 }
 
 const rooms = [
-  { name: 'Deluxe Room',      price: '₹2,499/night', desc: 'City view, AC, King bed, Smart TV',  amenities: ['AC', 'WiFi', 'TV', 'Breakfast'] },
-  { name: 'Suite',            price: '₹4,999/night', desc: 'Garden view, Jacuzzi, Living area',   amenities: ['AC', 'WiFi', 'TV', 'Breakfast', 'Jacuzzi'] },
-  { name: 'Family Room',      price: '₹3,499/night', desc: '2 Queen beds, Extra space, Balcony',  amenities: ['AC', 'WiFi', 'TV', 'Breakfast', 'Balcony'] },
+  { name: 'Deluxe Room',   price: '₹2,499', tag: 'City View', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&q=80', amenities: ['AC', 'WiFi', 'Breakfast', 'Smart TV'] },
+  { name: 'Premium Suite', price: '₹4,999', tag: 'Best Value', img: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400&q=80', amenities: ['AC', 'WiFi', 'Breakfast', 'Jacuzzi', 'Balcony'] },
+  { name: 'Family Room',   price: '₹3,499', tag: 'Garden View', img: 'https://images.unsplash.com/photo-1591088398332-8596b4f39dcd?w=400&q=80', amenities: ['AC', 'WiFi', 'Breakfast', '2 Beds'] },
 ]
 
-const amenities = [
-  { icon: Wifi,     label: 'Free WiFi'      },
-  { icon: Coffee,   label: 'Free Breakfast' },
-  { icon: Car,      label: 'Free Parking'   },
-  { icon: Utensils, label: 'Restaurant'     },
+const gallery = [
+  'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80',
+  'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&q=80',
+  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80',
+  'https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=400&q=80',
 ]
 
 export default function HotelDemo() {
@@ -26,98 +26,105 @@ export default function HotelDemo() {
     <div className="min-h-screen bg-white">
       <DemoBanner industry="Hotel / Resort" price="₹9,999" />
 
-      <nav className="sticky top-9 z-40 bg-white border-b border-gray-100 shadow-sm">
+      <nav className="sticky top-9 z-40 bg-white/90 backdrop-blur-sm border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-lg">🏨</div>
-            <div>
-              <div className="font-extrabold text-gray-900 text-base leading-tight">The Royal Palace Hotel</div>
-              <div className="text-xs text-gray-400">4★ Hotel · Jaipur, Rajasthan</div>
-            </div>
+          <div>
+            <div className="font-extrabold text-gray-900 text-lg">The Royal Palace</div>
+            <div className="text-xs text-gray-400">★★★★ Hotel · Jaipur, Rajasthan</div>
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-            <a href="#rooms" className="hover:text-yellow-600">Rooms</a>
-            <a href="#amenities" className="hover:text-yellow-600">Amenities</a>
-            <a href="#gallery" className="hover:text-yellow-600">Gallery</a>
+          <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600">
+            {['Rooms', 'Gallery', 'Amenities', 'Book'].map(l => <a key={l} href={`#${l.toLowerCase()}`} className="hover:text-yellow-600 transition-colors">{l}</a>)}
           </div>
-          <a href="#book" className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">Book Room</a>
+          <a href="#book" className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold px-5 py-2 rounded-xl transition-colors">Check Availability</a>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-yellow-600 via-orange-600 to-red-700 text-white py-28">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm mb-6">
-            <Star className="w-4 h-4 text-yellow-300 fill-yellow-300" /> 4.7 on TripAdvisor · 500+ Reviews
+      <section className="relative h-screen min-h-[600px] flex items-center overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600&q=80" alt="Hotel" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+        <div className="relative max-w-6xl mx-auto px-6 text-white">
+          <div className="flex items-center gap-1 mb-4">
+            {[1,2,3,4].map(i => <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />)}
+            <span className="text-white/60 text-sm ml-2">500+ TripAdvisor reviews</span>
           </div>
-          <h1 className="text-5xl sm:text-7xl font-extrabold mb-6">Where Heritage<br />Meets Luxury</h1>
-          <p className="text-yellow-100 text-xl max-w-xl mx-auto mb-10">A royal experience in the heart of Jaipur. 42 elegantly appointed rooms. Fine dining. Spa. Conference facilities.</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a href="#book" className="bg-white text-yellow-600 font-bold px-8 py-3 rounded-xl hover:bg-yellow-50 transition-colors">Check Availability</a>
-            <a href="#rooms" className="border-2 border-white/40 text-white font-bold px-8 py-3 rounded-xl hover:bg-white/10 transition-colors">Explore Rooms</a>
+          <h1 className="text-5xl sm:text-7xl font-extrabold mb-5 leading-tight">
+            Where Heritage<br /><span className="text-yellow-400">Meets Luxury</span>
+          </h1>
+          <p className="text-white/70 text-xl max-w-xl mb-10">42 elegantly appointed rooms. Award-winning restaurant. Infinity pool. In the heart of the Pink City.</p>
+          <div className="flex flex-wrap gap-4">
+            <a href="#book" className="bg-yellow-500 hover:bg-yellow-400 text-white font-bold px-8 py-3.5 rounded-xl transition-colors">Check Availability</a>
+            <a href="#rooms" className="bg-white/10 border border-white/30 backdrop-blur-sm text-white font-bold px-8 py-3.5 rounded-xl hover:bg-white/20 transition-colors">Explore Rooms</a>
           </div>
-          <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto">
-            {[['42', 'Rooms'], ['4★', 'Rating'], ['1995', 'Est.'], ['500+', 'Reviews']].map(([v,l]) => (
-              <div key={l}><div className="text-3xl font-extrabold">{v}</div><div className="text-yellow-200 text-sm">{l}</div></div>
-            ))}
-          </div>
+        </div>
+        {/* Floating stats */}
+        <div className="absolute bottom-8 right-8 flex gap-3 hidden md:flex">
+          {[['42', 'Rooms'],['1995','Est.'],['4.7★','Rating']].map(([v,l]) => (
+            <div key={l} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
+              <div className="text-xl font-extrabold text-yellow-400">{v}</div>
+              <div className="text-xs text-white/60">{l}</div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Amenities */}
-      <section id="amenities" className="py-10 bg-yellow-50 border-b border-yellow-100">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {amenities.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-3 bg-white rounded-xl p-3 border border-yellow-100">
-                <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4 h-4 text-yellow-600" />
-                </div>
-                <span className="text-sm font-semibold text-gray-700">{label}</span>
-              </div>
-            ))}
-          </div>
+      {/* Amenities bar */}
+      <section id="amenities" className="bg-yellow-500 py-5">
+        <div className="max-w-5xl mx-auto px-4 flex flex-wrap items-center justify-center gap-8 text-white text-sm font-semibold">
+          {['🍳 Free Breakfast', '📶 Free WiFi', '🚗 Free Parking', '🏊 Infinity Pool', '🍽️ Restaurant', '💆 Spa & Wellness'].map(f => <span key={f}>{f}</span>)}
         </div>
       </section>
 
       {/* Rooms */}
-      <section id="rooms" className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-10">Our Rooms</h2>
+      <section id="rooms" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-3">Our Rooms</h2>
+            <p className="text-gray-500">Each room designed to blend heritage with modern comfort.</p>
+          </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {rooms.map((room) => (
-              <div key={room.name} className="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="bg-gradient-to-br from-yellow-400 to-orange-400 h-36 flex items-center justify-center text-6xl">🛏️</div>
-                <div className="p-5">
-                  <h3 className="font-extrabold text-gray-900 mb-1">{room.name}</h3>
-                  <p className="text-sm text-gray-500 mb-3">{room.desc}</p>
+            {rooms.map(r => (
+              <div key={r.name} className="group rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                <div className="relative h-52 overflow-hidden">
+                  <img src={r.img} alt={r.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute top-3 right-3 bg-yellow-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">{r.tag}</div>
+                </div>
+                <div className="p-5 bg-white">
+                  <h3 className="font-extrabold text-gray-900 text-lg mb-2">{r.name}</h3>
                   <div className="flex flex-wrap gap-1.5 mb-4">
-                    {room.amenities.map(a => <span key={a} className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded-full">{a}</span>)}
+                    {r.amenities.map(a => <span key={a} className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-100 px-2 py-0.5 rounded-full">{a}</span>)}
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="font-extrabold text-yellow-600">{room.price}</div>
-                    <a href="#book" className="text-sm bg-yellow-500 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-yellow-600 transition-colors">Book</a>
+                    <div><div className="text-xl font-extrabold text-yellow-600">{r.price}</div><div className="text-xs text-gray-400">per night</div></div>
+                    <a href="#book" className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors">Book</a>
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery */}
+      <section id="gallery" className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-10">Property Gallery</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {gallery.map((src, i) => <div key={i} className="rounded-xl overflow-hidden aspect-square"><img src={src} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform" /></div>)}
           </div>
         </div>
       </section>
 
       {/* Booking */}
-      <section id="book" className="py-16 bg-gradient-to-br from-yellow-600 to-orange-700 text-white">
+      <section id="book" className="py-20 bg-gradient-to-br from-yellow-600 to-orange-700 text-white">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-extrabold mb-4">Check Availability</h2>
-          <div className="bg-white rounded-2xl p-6 text-gray-900 grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <div className="bg-white rounded-2xl p-5 text-gray-900 grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {['Check-in', 'Check-out', 'Guests', 'Room Type'].map(l => (
-              <div key={l}>
-                <label className="text-xs font-semibold text-gray-500 block mb-1">{l}</label>
-                <div className="input-field bg-gray-50 text-gray-400 text-sm">{l}…</div>
-              </div>
+              <div key={l}><label className="text-xs font-semibold text-gray-500 block mb-1">{l}</label><div className="input-field bg-gray-50 text-gray-400 text-sm">{l}…</div></div>
             ))}
           </div>
-          <button className="bg-white text-yellow-600 font-bold px-8 py-3 rounded-xl hover:bg-yellow-50 w-full sm:w-auto">Search Rooms</button>
+          <button className="bg-white text-yellow-700 font-bold px-10 py-3.5 rounded-xl hover:bg-yellow-50 w-full sm:w-auto transition-colors">Search Available Rooms</button>
         </div>
       </section>
 

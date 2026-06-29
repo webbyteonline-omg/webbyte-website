@@ -1,17 +1,27 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Star, ArrowRight, CheckCircle2, Clock, CalendarCheck } from 'lucide-react'
+import { Star, ArrowRight, CheckCircle2 } from 'lucide-react'
 import DemoBanner from '@/components/DemoBanner'
 
 export const metadata: Metadata = {
-  title: 'Salon & Spa Website Demo | WebByte',
-  description: 'See how your salon or spa website will look — with services, pricing, and online slot booking.',
+  title: 'Glam Studio Salon | WebByte Demo',
+  description: 'Premium salon & spa website demo with online slot booking, services menu, and stylist selection.',
 }
 
 const services = [
-  { category: 'Hair',  items: [{ name: 'Haircut (Ladies)', price: '₹400' }, { name: 'Blow Dry + Styling', price: '₹600' }, { name: 'Keratin Treatment', price: '₹3,500' }] },
-  { category: 'Skin',  items: [{ name: 'Gold Facial',      price: '₹1,200' }, { name: 'Clean-up',          price: '₹700' }, { name: 'Detan',           price: '₹500' }] },
-  { category: 'Nails', items: [{ name: 'Manicure',         price: '₹500' }, { name: 'Pedicure',           price: '₹600' }, { name: 'Gel Nails',        price: '₹1,800' }] },
+  { name: 'Haircut & Blow Dry',   price: '₹700',   time: '60 min',  img: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=200&q=80', popular: true  },
+  { name: 'Keratin Treatment',    price: '₹3,500', time: '180 min', img: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200&q=80', popular: false },
+  { name: 'Gold Facial',          price: '₹1,200', time: '60 min',  img: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=200&q=80', popular: true  },
+  { name: 'Bridal Makeup',        price: '₹8,000', time: '180 min', img: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=200&q=80', popular: false },
+  { name: 'Gel Nails',            price: '₹1,800', time: '90 min',  img: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=200&q=80', popular: false },
+  { name: 'Full Body Massage',    price: '₹2,500', time: '90 min',  img: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=200&q=80', popular: true  },
+]
+
+const gallery = [
+  'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=400&q=80',
+  'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80',
+  'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80',
+  'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&q=80',
 ]
 
 export default function SalonDemo() {
@@ -19,58 +29,77 @@ export default function SalonDemo() {
     <div className="min-h-screen bg-white">
       <DemoBanner industry="Salon & Spa" price="₹9,999" />
 
-      <nav className="sticky top-9 z-40 bg-white border-b border-gray-100 shadow-sm">
+      <nav className="sticky top-9 z-40 bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center text-white text-lg">💇</div>
-            <div>
-              <div className="font-extrabold text-gray-900 text-base">Glam Studio</div>
-              <div className="text-xs text-gray-400">Premium Ladies Salon & Spa</div>
-            </div>
+          <div>
+            <div className="font-extrabold text-gray-900 text-lg tracking-tight">GLAM <span className="text-pink-500">STUDIO</span></div>
+            <div className="text-xs text-gray-400">Premium Ladies Salon & Spa</div>
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-            <a href="#services" className="hover:text-pink-600">Services</a>
-            <a href="#book" className="hover:text-pink-600">Book Appointment</a>
+          <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600">
+            {['Services', 'Gallery', 'Book', 'About'].map(l => <a key={l} href={`#${l.toLowerCase()}`} className="hover:text-pink-500 transition-colors">{l}</a>)}
           </div>
-          <a href="#book" className="bg-pink-500 hover:bg-pink-600 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">Book Slot</a>
+          <a href="#book" className="bg-pink-500 hover:bg-pink-600 text-white text-sm font-bold px-5 py-2 rounded-full transition-colors">Book Appointment</a>
         </div>
       </nav>
 
-      <section className="bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 text-white py-24">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm mb-6">
-            <Star className="w-4 h-4 text-yellow-300 fill-yellow-300" /> 4.9 Rating · 2,000+ Happy Clients
+      {/* Hero — full image with overlay */}
+      <section className="relative h-[90vh] min-h-[560px] flex items-end overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1560869713-7d0a29430803?w=1600&q=80" alt="Salon" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+        <div className="relative max-w-6xl mx-auto px-6 pb-16 text-white w-full">
+          <div className="flex items-center gap-1 mb-4">
+            {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
+            <span className="text-white/70 text-sm ml-2">4.9 · 2,000+ clients · Connaught Place, Delhi</span>
           </div>
-          <h1 className="text-5xl sm:text-7xl font-extrabold mb-5">Look Good.<br />Feel Amazing.</h1>
-          <p className="text-pink-100 text-xl max-w-xl mx-auto mb-10">Premium beauty services by expert stylists. Walk in refreshed. Walk out gorgeous. Book your slot in 2 minutes.</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a href="#book" className="bg-white text-pink-600 font-bold px-8 py-3 rounded-xl hover:bg-pink-50 transition-colors">Book Appointment</a>
-            <a href="#services" className="border-2 border-white/40 text-white font-bold px-8 py-3 rounded-xl hover:bg-white/10 transition-colors">Our Services</a>
-          </div>
-          <div className="mt-12 grid grid-cols-3 gap-6 max-w-lg mx-auto">
-            {[['8 yrs','In Business'], ['2000+','Happy Clients'], ['4.9★','Google Rating']].map(([v,l]) => (
-              <div key={l}><div className="text-3xl font-extrabold">{v}</div><div className="text-pink-200 text-sm">{l}</div></div>
-            ))}
+          <h1 className="text-5xl sm:text-7xl font-extrabold mb-5 leading-none">
+            Look Good.<br /><span className="text-pink-400">Feel Amazing.</span>
+          </h1>
+          <p className="text-white/70 text-xl max-w-xl mb-10">Expert stylists. Premium products. A salon experience that feels personal, not rushed.</p>
+          <div className="flex flex-wrap gap-4">
+            <a href="#book" className="bg-pink-500 hover:bg-pink-400 text-white font-bold px-8 py-3.5 rounded-full transition-colors">Book Your Slot</a>
+            <a href="#services" className="bg-white/10 border border-white/30 backdrop-blur-sm text-white font-bold px-8 py-3.5 rounded-full hover:bg-white/20 transition-colors">Our Services</a>
           </div>
         </div>
       </section>
 
       {/* Services */}
-      <section id="services" className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-2xl font-extrabold text-gray-900 text-center mb-10">Our Services & Pricing</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {services.map((cat) => (
-              <div key={cat.category} className="bg-pink-50 rounded-2xl border border-pink-100 p-5">
-                <h3 className="font-extrabold text-pink-700 text-lg mb-4 pb-2 border-b border-pink-100">{cat.category}</h3>
-                <div className="space-y-3">
-                  {cat.items.map((item) => (
-                    <div key={item.name} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">{item.name}</span>
-                      <span className="font-extrabold text-pink-600">{item.price}</span>
-                    </div>
-                  ))}
+      <section id="services" className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-extrabold text-gray-900 mb-3">Services & Pricing</h2>
+            <p className="text-gray-500">Every service performed by certified beauty professionals.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {services.map(s => (
+              <div key={s.name} className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all">
+                <div className="relative h-36 overflow-hidden">
+                  <img src={s.img} alt={s.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {s.popular && <div className="absolute top-3 right-3 bg-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Popular</div>}
                 </div>
+                <div className="p-4 flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-gray-900 text-sm">{s.name}</div>
+                    <div className="text-xs text-gray-400 mt-0.5">⏱ {s.time}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-extrabold text-pink-600">{s.price}</div>
+                    <a href="#book" className="text-xs text-pink-500 font-semibold hover:underline">Book →</a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery */}
+      <section id="gallery" className="py-16 bg-pink-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-10">Our Work</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {gallery.map((src, i) => (
+              <div key={i} className="rounded-2xl overflow-hidden aspect-square hover:scale-105 transition-transform">
+                <img src={src} alt={`Gallery ${i+1}`} className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
@@ -78,39 +107,44 @@ export default function SalonDemo() {
       </section>
 
       {/* Booking */}
-      <section id="book" className="py-16 bg-gradient-to-br from-pink-600 to-rose-700 text-white">
-        <div className="max-w-4xl mx-auto px-4">
+      <section id="book" className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <h2 className="text-3xl font-extrabold mb-4">Book Your Appointment</h2>
-              <p className="text-pink-100 mb-6">No waiting. Pick your slot, confirm in 1 click. Get WhatsApp reminder 1 hour before.</p>
-              {['Real-time slot availability', 'WhatsApp reminder before appointment', 'No cancellation fee up to 2 hrs', 'Choose your preferred stylist'].map(f => (
-                <div key={f} className="flex items-center gap-2 text-sm text-pink-100 mb-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-300" /> {f}
-                </div>
+              <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Book Your Appointment</h2>
+              <p className="text-gray-500 mb-6 leading-relaxed">Real-time availability. Pick your service and stylist. WhatsApp reminder 1 hour before.</p>
+              {['Real-time slot availability', 'Choose your preferred stylist', 'WhatsApp reminder 1hr before', 'Free rescheduling up to 2 hours'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-gray-600 text-sm mb-2"><CheckCircle2 className="w-4 h-4 text-pink-500" />{f}</div>
               ))}
-            </div>
-            <div className="bg-white rounded-2xl p-6 text-gray-900 space-y-3">
-              {['Your Name', 'Phone Number', 'Service'].map(f => (
-                <div key={f}>
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">{f}</label>
-                  <div className="input-field bg-gray-50 text-gray-400 text-sm">{f}…</div>
-                </div>
-              ))}
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-xs font-semibold text-gray-500 block mb-1">Date</label><div className="input-field bg-gray-50 text-gray-400 text-sm">Pick date</div></div>
-                <div><label className="text-xs font-semibold text-gray-500 block mb-1">Time Slot</label><div className="input-field bg-gray-50 text-gray-400 text-sm">11:00 AM</div></div>
+              <div className="mt-6 bg-pink-50 rounded-2xl p-4 border border-pink-100">
+                <div className="text-xs font-semibold text-pink-600 mb-2">🎁 First-time client offer</div>
+                <div className="font-bold text-gray-900 text-sm">20% off your first appointment</div>
+                <div className="text-xs text-gray-400 mt-0.5">Valid for new customers only</div>
               </div>
-              <button className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl text-sm hover:bg-pink-600 transition-colors">Confirm Booking</button>
+            </div>
+            <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100">
+              <div className="space-y-3">
+                {['Your Name', 'Phone Number', 'Service'].map(f => (
+                  <div key={f}><label className="text-xs font-semibold text-gray-500 block mb-1">{f}</label><div className="input-field bg-white text-gray-400 text-sm">{f}…</div></div>
+                ))}
+                <div><label className="text-xs font-semibold text-gray-500 block mb-1">Preferred Stylist</label><div className="input-field bg-white text-gray-400 text-sm">Any available</div></div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div><label className="text-xs font-semibold text-gray-500 block mb-1">Date</label><div className="input-field bg-white text-gray-400 text-sm">Date</div></div>
+                  <div><label className="text-xs font-semibold text-gray-500 block mb-1">Time</label><div className="input-field bg-white text-gray-400 text-sm">11:00 AM</div></div>
+                </div>
+                <button className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl text-sm hover:bg-pink-600 transition-colors">Confirm Booking</button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-14 bg-white text-center">
-        <h2 className="text-2xl font-extrabold text-gray-900 mb-3">Want This for Your Salon?</h2>
-        <p className="text-gray-500 mb-6 text-sm">Service menu · Slot booking · WhatsApp reminders · Gallery · Reviews</p>
-        <Link href="/order" className="btn-primary">Get My Salon Website — ₹9,999 <ArrowRight className="w-4 h-4" /></Link>
+      <section className="py-14 bg-pink-600 text-center text-white">
+        <h2 className="text-2xl font-extrabold mb-3">Want This for Your Salon?</h2>
+        <p className="text-pink-100 mb-6 text-sm">Service menu · Slot booking · Gallery · Stylist profiles · Offers</p>
+        <Link href="/order" className="inline-flex items-center gap-2 bg-white text-pink-600 font-bold px-8 py-3.5 rounded-xl hover:bg-pink-50 transition-colors">
+          Get My Salon Website — ₹9,999 <ArrowRight className="w-4 h-4" />
+        </Link>
       </section>
     </div>
   )
