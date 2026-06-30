@@ -7,6 +7,7 @@ import {
   CalendarCheck, Layers, Sparkles, ExternalLink
 } from 'lucide-react'
 import ROICalculator from '@/components/ROICalculator'
+import DynamicBanner from '@/components/DynamicBanner'
 
 export const metadata: Metadata = {
   title: 'WebByte — Professional Websites, SaaS & Billing Software',
@@ -447,6 +448,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Dynamic homepage banner (card style) — shown when active in admin */}
+      <DynamicBanner position="homepage" />
 
       {/* Final CTA */}
       <section className="section bg-cta-gradient">

@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import AuthProvider from '@/components/AuthProvider'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import DynamicBanner from '@/components/DynamicBanner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -58,6 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
+          {showChrome && <DynamicBanner position="top-strip" />}
           {showChrome && <Navbar />}
           <main>{children}</main>
           {showChrome && <Footer />}

@@ -6,11 +6,31 @@ import {
   MessageCircle, Phone, BarChart3, ShieldCheck, Filter, Menu, Save,
   AlertCircle, ArrowRight, IndianRupee, Mail, Target, Check, Copy,
   ExternalLink, Download, Printer, Plus, Eye, EyeOff, Pencil, Trash2,
-  Globe, Tag
+  Globe, Tag, Sparkles, Percent, Gift, Image as ImageIcon, ToggleLeft,
+  ToggleRight, Zap, PaintBucket, AlignLeft, Link, BadgePercent, Layers,
+  SlidersHorizontal, ChevronDown, ChevronUp, Star
 } from 'lucide-react'
 
 // ── Types ──────────────────────────────────────────────────────────────────
-type Tab = 'dashboard' | 'orders' | 'pipeline' | 'customers' | 'revenue' | 'blog'
+type Tab = 'dashboard' | 'orders' | 'pipeline' | 'customers' | 'revenue' | 'offers' | 'banners' | 'pricing' | 'blog'
+
+interface Offer {
+  id: string; title: string; code: string; discountType: string; discountValue: number
+  description: string | null; minOrderValue: number | null; maxUses: number | null
+  usedCount: number; active: boolean; expiresAt: string | null; createdAt: string
+}
+
+interface SiteBanner {
+  id: string; title: string; subtitle: string | null; badge: string | null
+  ctaText: string | null; ctaLink: string | null; gradient: string; position: string
+  style: string; active: boolean; priority: number; startsAt: string | null; endsAt: string | null
+  createdAt: string
+}
+
+interface ProductConfig {
+  id: string; productId: string; productName: string; category: string
+  basePrice: number; salePrice: number | null; active: boolean; updatedAt: string
+}
 
 interface Order {
   id: string; orderNumber: string; customerName: string; customerEmail: string
@@ -154,6 +174,49 @@ export default function AdminPage() {
   const [bError,       setBError]       = useState('')
   const [deleteConfirm,setDeleteConfirm]= useState<string | null>(null)
 
+  // Offers tab
+  const [offers,       setOffers]      = useState<Offer[]>([])
+  const [offersLoad,   setOffersLoad]  = useState(false)
+  const [offerForm,    setOfferForm]   = useState(false)
+  const [oTitle,       setOTitle]      = useState('')
+  const [oCode,        setOCode]       = useState('')
+  const [oType,        setOType]       = useState<'PERCENTAGE'|'FIXED'>('PERCENTAGE')
+  const [oValue,       setOValue]      = useState('')
+  const [oDesc,        setODesc]       = useState('')
+  const [oMin,         setOMin]        = useState('')
+  const [oMaxUses,     setOMaxUses]    = useState('')
+  const [oExpiry,      setOExpiry]     = useState('')
+  const [oSaving,      setOSaving]     = useState(false)
+  const [oError,       setOError]      = useState('')
+
+  // Banners tab
+  const [banners,      setBanners]     = useState<SiteBanner[]>([])
+  const [bannersLoad,  setBannersLoad] = useState(false)
+  const [bannerForm,   setBannerForm]  = useState(false)
+  const [editBanner,   setEditBanner]  = useState<SiteBanner | null>(null)
+  const [bnTitle,      setBnTitle]     = useState('')
+  const [bnSub,        setBnSub]       = useState('')
+  const [bnBadge,      setBnBadge]     = useState('')
+  const [bnCta,        setBnCta]       = useState('')
+  const [bnLink,       setBnLink]      = useState('')
+  const [bnGrad,       setBnGrad]      = useState('from-purple-600 to-indigo-700')
+  const [bnPos,        setBnPos]       = useState('homepage')
+  const [bnStyle,      setBnStyle]     = useState('strip')
+  const [bnPriority,   setBnPriority]  = useState('0')
+  const [bnStart,      setBnStart]     = useState('')
+  const [bnEnd,        setBnEnd]       = useState('')
+  const [bnSaving,     setBnSaving]    = useState(false)
+  const [bnError,      setBnError]     = useState('')
+  const [bnSaved,      setBnSaved]     = useState(false)
+
+  // Pricing tab
+  const [configs,      setConfigs]     = useState<ProductConfig[]>([])
+  const [configsLoad,  setConfigsLoad] = useState(false)
+  const [editingPrice, setEditingPrice]= useState<string | null>(null)
+  const [pBase,        setPBase]       = useState('')
+  const [pSale,        setPSale]       = useState('')
+  const [pSaving,      setPSaving]     = useState(false)
+
   // ── Fetches ─────────────────────────────────────────────────────────────
   const fetchOrders = useCallback(async (silent = false) => {
     silent ? setRefreshing(true) : setLoading(true)
@@ -169,8 +232,32 @@ export default function AdminPage() {
     finally { setBlogLoading(false) }
   }, [])
 
+  const fetchOffers = useCallback(async () => {
+    setOffersLoad(true)
+    try { const r = await fetch('/api/admin/offers'); const j = await r.json(); setOffers(j.offers || []) }
+    catch (e) { console.error(e) }
+    finally { setOffersLoad(false) }
+  }, [])
+
+  const fetchBanners = useCallback(async () => {
+    setBannersLoad(true)
+    try { const r = await fetch('/api/admin/banners'); const j = await r.json(); setBanners(j.banners || []) }
+    catch (e) { console.error(e) }
+    finally { setBannersLoad(false) }
+  }, [])
+
+  const fetchConfigs = useCallback(async () => {
+    setConfigsLoad(true)
+    try { const r = await fetch('/api/admin/pricing'); const j = await r.json(); setConfigs(j.configs || []) }
+    catch (e) { console.error(e) }
+    finally { setConfigsLoad(false) }
+  }, [])
+
   useEffect(() => { fetchOrders() }, [fetchOrders])
-  useEffect(() => { if (tab === 'blog') fetchBlog() }, [tab, fetchBlog])
+  useEffect(() => { if (tab === 'blog')    fetchBlog()    }, [tab, fetchBlog])
+  useEffect(() => { if (tab === 'offers')  fetchOffers()  }, [tab, fetchOffers])
+  useEffect(() => { if (tab === 'banners') fetchBanners() }, [tab, fetchBanners])
+  useEffect(() => { if (tab === 'pricing') fetchConfigs() }, [tab, fetchConfigs])
 
   // ── Order drawer ─────────────────────────────────────────────────────────
   const openDrawer = (o: Order) => {
@@ -273,14 +360,28 @@ export default function AdminPage() {
   }, [orders, statusFilter, search, dateFrom, dateTo])
 
   // ── Nav ──────────────────────────────────────────────────────────────────
-  const navItems: { id: Tab; label: string; Icon: any; badge?: number }[] = [
-    { id: 'dashboard', label: 'Dashboard',  Icon: LayoutDashboard },
-    { id: 'orders',    label: 'Orders',     Icon: Package,    badge: orders.filter(o => o.status === 'PENDING').length || undefined },
-    { id: 'pipeline',  label: 'Pipeline',   Icon: LayoutGrid, badge: orders.filter(o => o.status === 'IN_PROGRESS').length || undefined },
-    { id: 'customers', label: 'Customers',  Icon: Users },
-    { id: 'revenue',   label: 'Revenue',    Icon: TrendingUp },
-    { id: 'blog',      label: 'Blog',       Icon: FileText,   badge: blogPosts.filter(p => !p.published).length || undefined },
+  type NavSection = { section: string; items: { id: Tab; label: string; Icon: any; badge?: number }[] }
+  const navSections: NavSection[] = [
+    { section: 'OPERATIONS', items: [
+      { id: 'dashboard', label: 'Dashboard',  Icon: LayoutDashboard },
+      { id: 'orders',    label: 'Orders',     Icon: Package,    badge: orders.filter(o => o.status === 'PENDING').length || undefined },
+      { id: 'pipeline',  label: 'Pipeline',   Icon: LayoutGrid, badge: orders.filter(o => o.status === 'IN_PROGRESS').length || undefined },
+    ]},
+    { section: 'GROWTH', items: [
+      { id: 'customers', label: 'Customers',  Icon: Users },
+      { id: 'revenue',   label: 'Revenue',    Icon: TrendingUp },
+    ]},
+    { section: 'MARKETING', items: [
+      { id: 'offers',    label: 'Offers & Coupons', Icon: BadgePercent, badge: offers.filter(o => o.active).length || undefined },
+      { id: 'banners',   label: 'Banners',          Icon: Layers,       badge: banners.filter(b => b.active).length || undefined },
+      { id: 'pricing',   label: 'Pricing',          Icon: SlidersHorizontal },
+    ]},
+    { section: 'CONTENT', items: [
+      { id: 'blog',      label: 'Blog',       Icon: FileText,   badge: blogPosts.filter(p => !p.published).length || undefined },
+    ]},
   ]
+  // flat list for header title lookup
+  const navItems = navSections.flatMap(s => s.items)
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950">
@@ -968,6 +1069,511 @@ export default function AdminPage() {
     </>
   )
 
+  // ── Random coupon code generator ─────────────────────────────────────────
+  const genCode = () => {
+    const words  = ['WEB','BYTE','DEAL','SAVE','GET','WIN','OFFER','SALE','BEST','PRO']
+    const nums   = Math.floor(Math.random() * 80 + 10)
+    const prefix = words[Math.floor(Math.random() * words.length)]
+    setOCode(`${prefix}${nums}`)
+  }
+
+  // ── Offers tab ────────────────────────────────────────────────────────────
+  const saveOffer = async () => {
+    if (!oTitle || !oCode || !oValue) { setOError('Title, code and value are required'); return }
+    setOSaving(true); setOError('')
+    const r = await fetch('/api/admin/offers', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: oTitle, code: oCode, discountType: oType, discountValue: Number(oValue), description: oDesc || null, minOrderValue: oMin ? Number(oMin) : null, maxUses: oMaxUses ? Number(oMaxUses) : null, expiresAt: oExpiry || null }),
+    })
+    if (!r.ok) { const j = await r.json(); setOError(j.error || 'Error saving'); setOSaving(false); return }
+    await fetchOffers(); setOSaving(false); setOfferForm(false)
+    setOTitle(''); setOCode(''); setOValue(''); setODesc(''); setOMin(''); setOMaxUses(''); setOExpiry('')
+  }
+  const toggleOffer = async (o: Offer) => {
+    await fetch(`/api/admin/offers/${o.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !o.active }) })
+    await fetchOffers()
+  }
+  const deleteOffer = async (id: string) => {
+    await fetch(`/api/admin/offers/${id}`, { method: 'DELETE' }); await fetchOffers()
+  }
+  const copyCode = (code: string) => { navigator.clipboard.writeText(code) }
+
+  const renderOffers = () => (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-extrabold text-white">Offers & Coupons</h2>
+          <p className="text-xs text-gray-500 mt-0.5">{offers.filter(o => o.active).length} active · {offers.length} total</p>
+        </div>
+        <button onClick={() => { setOfferForm(true); setOError('') }} className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-xl transition-colors">
+          <Plus className="w-4 h-4" /> New Offer
+        </button>
+      </div>
+
+      {offerForm && (
+        <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-sm font-bold text-white">Create Offer</h3>
+            <button onClick={() => setOfferForm(false)} className="text-gray-600 hover:text-gray-400"><X className="w-4 h-4" /></button>
+          </div>
+          {oError && <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg">{oError}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="sm:col-span-2">
+              <label className="text-xs text-gray-500 mb-1 block">Offer Title</label>
+              <input value={oTitle} onChange={e => setOTitle(e.target.value)} placeholder="Diwali Special 30% Off"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Coupon Code</label>
+              <div className="flex gap-2">
+                <input value={oCode} onChange={e => setOCode(e.target.value.toUpperCase())} placeholder="DIWALI30"
+                  className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600 font-mono" />
+                <button onClick={genCode} className="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 rounded-xl text-xs font-bold border border-purple-600/30 transition-colors whitespace-nowrap">
+                  <Zap className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Discount Type</label>
+              <select value={oType} onChange={e => setOType(e.target.value as any)}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-600">
+                <option value="PERCENTAGE">Percentage (%)</option>
+                <option value="FIXED">Fixed Amount (₹)</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Discount Value</label>
+              <input type="number" value={oValue} onChange={e => setOValue(e.target.value)} placeholder={oType === 'PERCENTAGE' ? '30' : '500'}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Min Order Value (₹)</label>
+              <input type="number" value={oMin} onChange={e => setOMin(e.target.value)} placeholder="Leave blank for none"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Max Uses</label>
+              <input type="number" value={oMaxUses} onChange={e => setOMaxUses(e.target.value)} placeholder="Leave blank for unlimited"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Expires At</label>
+              <input type="date" value={oExpiry} onChange={e => setOExpiry(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-600" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs text-gray-500 mb-1 block">Description (shown to customer)</label>
+              <input value={oDesc} onChange={e => setODesc(e.target.value)} placeholder="Get 30% off on all website packages this Diwali!"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+          </div>
+          <div className="flex gap-3 pt-1">
+            <button onClick={() => setOfferForm(false)} className="flex-1 py-2.5 rounded-xl bg-gray-800 text-gray-400 text-sm font-semibold hover:bg-gray-700 transition-colors">Cancel</button>
+            <button onClick={saveOffer} disabled={oSaving} className="flex-1 flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-colors">
+              {oSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />} {oSaving ? 'Saving…' : 'Create Offer'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {offersLoad ? (
+        <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-purple-400" /></div>
+      ) : offers.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Gift className="w-10 h-10 text-gray-700 mb-3" /><p className="text-gray-500">No offers yet. Create your first coupon!</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {offers.map(o => {
+            const usagePct = o.maxUses ? Math.round(o.usedCount / o.maxUses * 100) : null
+            const expired  = o.expiresAt ? new Date(o.expiresAt) < new Date() : false
+            return (
+              <div key={o.id} className={`bg-gray-800/40 border rounded-2xl p-4 space-y-3 transition-all ${o.active && !expired ? 'border-gray-700' : 'border-gray-800 opacity-60'}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-white truncate">{o.title}</p>
+                    {o.description && <p className="text-xs text-gray-500 truncate mt-0.5">{o.description}</p>}
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <button onClick={() => copyCode(o.code)} title="Copy code" className="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-400 hover:text-white transition-colors"><Copy className="w-3 h-3" /></button>
+                    <button onClick={() => toggleOffer(o)} title={o.active ? 'Deactivate' : 'Activate'} className={`p-1.5 rounded-lg transition-colors ${o.active ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-gray-700 text-gray-500 hover:bg-gray-600'}`}>
+                      {o.active ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+                    </button>
+                    <button onClick={() => deleteOffer(o.id)} className="p-1.5 rounded-lg bg-gray-700 hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="w-3 h-3" /></button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-xs font-bold bg-purple-600/20 text-purple-300 border border-purple-600/30 px-2.5 py-1 rounded-lg">{o.code}</span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${o.discountType === 'PERCENTAGE' ? 'bg-blue-500/20 text-blue-300' : 'bg-emerald-500/20 text-emerald-300'}`}>
+                    {o.discountType === 'PERCENTAGE' ? `${o.discountValue}% OFF` : `₹${o.discountValue} OFF`}
+                  </span>
+                  {expired && <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">Expired</span>}
+                  {!o.active && !expired && <span className="text-xs bg-gray-600/30 text-gray-500 px-2 py-0.5 rounded-full">Inactive</span>}
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-600">
+                  {o.minOrderValue && <span>Min ₹{o.minOrderValue.toLocaleString('en-IN')}</span>}
+                  {o.expiresAt && <span>Expires {fmt(o.expiresAt)}</span>}
+                </div>
+                {o.maxUses !== null && (
+                  <div>
+                    <div className="flex justify-between text-xs text-gray-600 mb-1">
+                      <span>Usage</span><span>{o.usedCount}/{o.maxUses}</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${(usagePct ?? 0) > 80 ? 'bg-red-500' : 'bg-purple-500'}`} style={{ width: `${usagePct ?? 0}%` }} />
+                    </div>
+                  </div>
+                )}
+                {o.maxUses === null && <p className="text-xs text-gray-600">Used {o.usedCount} times · Unlimited uses</p>}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+
+  // ── Banners tab ───────────────────────────────────────────────────────────
+  const GRADIENT_PRESETS = [
+    { label: 'Purple–Indigo', value: 'from-purple-600 to-indigo-700' },
+    { label: 'Pink–Rose',     value: 'from-pink-500 to-rose-600' },
+    { label: 'Amber–Orange',  value: 'from-amber-500 to-orange-600' },
+    { label: 'Teal–Cyan',     value: 'from-teal-500 to-cyan-600' },
+    { label: 'Green–Emerald', value: 'from-green-500 to-emerald-700' },
+    { label: 'Blue–Violet',   value: 'from-blue-600 to-violet-700' },
+    { label: 'Slate–Gray',    value: 'from-slate-700 to-gray-800' },
+    { label: 'Red–Pink',      value: 'from-red-500 to-pink-600' },
+  ]
+  const POSITIONS = [
+    { value: 'top-strip',  label: 'Top Strip', desc: 'Across entire site header' },
+    { value: 'homepage',   label: 'Homepage',  desc: 'Main homepage section' },
+    { value: 'industries', label: 'Industries',desc: 'Industries/services page' },
+    { value: 'order',      label: 'Order Page',desc: 'Checkout/order form page' },
+  ]
+  const STYLES = [
+    { value: 'strip',    label: 'Strip',    desc: 'Thin dismissible top bar' },
+    { value: 'card',     label: 'Card',     desc: 'Prominent card section' },
+    { value: 'floating', label: 'Floating', desc: 'Corner popup widget' },
+  ]
+
+  const openBannerCreate = () => {
+    setEditBanner(null); setBnTitle(''); setBnSub(''); setBnBadge(''); setBnCta(''); setBnLink('')
+    setBnGrad('from-purple-600 to-indigo-700'); setBnPos('homepage'); setBnStyle('strip')
+    setBnPriority('0'); setBnStart(''); setBnEnd(''); setBnError(''); setBnSaved(false); setBannerForm(true)
+  }
+  const openBannerEdit = (b: SiteBanner) => {
+    setEditBanner(b); setBnTitle(b.title); setBnSub(b.subtitle || ''); setBnBadge(b.badge || '')
+    setBnCta(b.ctaText || ''); setBnLink(b.ctaLink || ''); setBnGrad(b.gradient)
+    setBnPos(b.position); setBnStyle(b.style); setBnPriority(String(b.priority))
+    setBnStart(b.startsAt ? b.startsAt.slice(0, 10) : ''); setBnEnd(b.endsAt ? b.endsAt.slice(0, 10) : '')
+    setBnError(''); setBnSaved(false); setBannerForm(true)
+  }
+  const saveBanner = async () => {
+    if (!bnTitle) { setBnError('Title is required'); return }
+    setBnSaving(true); setBnError('')
+    const url    = editBanner ? `/api/admin/banners/${editBanner.id}` : '/api/admin/banners'
+    const method = editBanner ? 'PATCH' : 'POST'
+    const r = await fetch(url, {
+      method, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: bnTitle, subtitle: bnSub || null, badge: bnBadge || null, ctaText: bnCta || null, ctaLink: bnLink || null, gradient: bnGrad, position: bnPos, style: bnStyle, priority: Number(bnPriority), startsAt: bnStart || null, endsAt: bnEnd || null }),
+    })
+    if (!r.ok) { const j = await r.json(); setBnError(j.error || 'Error saving'); setBnSaving(false); return }
+    await fetchBanners(); setBnSaving(false); setBnSaved(true); setTimeout(() => { setBnSaved(false); setBannerForm(false) }, 800)
+  }
+  const toggleBanner = async (b: SiteBanner) => {
+    await fetch(`/api/admin/banners/${b.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !b.active }) })
+    await fetchBanners()
+  }
+  const deleteBanner = async (id: string) => {
+    await fetch(`/api/admin/banners/${id}`, { method: 'DELETE' }); await fetchBanners()
+  }
+
+  const renderBanners = () => (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-extrabold text-white">Banners</h2>
+          <p className="text-xs text-gray-500 mt-0.5">{banners.filter(b => b.active).length} live · {banners.length} total</p>
+        </div>
+        <button onClick={openBannerCreate} className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-xl transition-colors">
+          <Plus className="w-4 h-4" /> New Banner
+        </button>
+      </div>
+
+      {/* Banner Builder Form */}
+      {bannerForm && (
+        <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white">{editBanner ? 'Edit Banner' : 'Create Banner'}</h3>
+            <button onClick={() => setBannerForm(false)} className="text-gray-600 hover:text-gray-400"><X className="w-4 h-4" /></button>
+          </div>
+          {bnError && <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg">{bnError}</p>}
+
+          {/* Live Preview */}
+          <div>
+            <p className="text-xs text-gray-500 mb-2">Live Preview</p>
+            <div className={`bg-gradient-to-r ${bnGrad} rounded-xl overflow-hidden`}>
+              {bnStyle === 'strip' ? (
+                <div className="flex items-center justify-between px-4 py-2.5 gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {bnBadge && <span className="text-xs font-bold bg-white/20 text-white px-2 py-0.5 rounded-full whitespace-nowrap">{bnBadge}</span>}
+                    <span className="text-white text-sm font-semibold truncate">{bnTitle || 'Your banner title here'}</span>
+                    {bnSub && <span className="text-white/70 text-xs truncate hidden sm:block">{bnSub}</span>}
+                  </div>
+                  {bnCta && <span className="text-xs font-bold bg-white/20 text-white px-3 py-1.5 rounded-lg whitespace-nowrap">{bnCta} →</span>}
+                </div>
+              ) : bnStyle === 'card' ? (
+                <div className="p-6 text-center">
+                  {bnBadge && <span className="inline-block text-xs font-bold bg-white/20 text-white px-3 py-1 rounded-full mb-3">{bnBadge}</span>}
+                  <h3 className="text-xl font-extrabold text-white mb-1">{bnTitle || 'Banner Title'}</h3>
+                  {bnSub && <p className="text-white/80 text-sm mb-4">{bnSub}</p>}
+                  {bnCta && <span className="inline-block bg-white text-gray-900 font-bold text-sm px-5 py-2 rounded-xl">{bnCta}</span>}
+                </div>
+              ) : (
+                <div className="p-4 max-w-xs">
+                  {bnBadge && <span className="text-xs font-bold bg-white/20 text-white px-2 py-0.5 rounded-full mb-2 inline-block">{bnBadge}</span>}
+                  <p className="text-white text-sm font-bold">{bnTitle || 'Banner Title'}</p>
+                  {bnSub && <p className="text-white/70 text-xs mt-1">{bnSub}</p>}
+                  {bnCta && <span className="inline-block mt-3 bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg">{bnCta}</span>}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="sm:col-span-2">
+              <label className="text-xs text-gray-500 mb-1 block">Title *</label>
+              <input value={bnTitle} onChange={e => setBnTitle(e.target.value)} placeholder="🎉 Diwali Offer — Get 30% Off All Websites!"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Subtitle</label>
+              <input value={bnSub} onChange={e => setBnSub(e.target.value)} placeholder="Limited time. Use code DIWALI30"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Badge / Label</label>
+              <input value={bnBadge} onChange={e => setBnBadge(e.target.value)} placeholder="🔥 LIMITED OFFER"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">CTA Button Text</label>
+              <input value={bnCta} onChange={e => setBnCta(e.target.value)} placeholder="Grab This Deal"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">CTA Link</label>
+              <input value={bnLink} onChange={e => setBnLink(e.target.value)} placeholder="/order"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Position</label>
+              <select value={bnPos} onChange={e => setBnPos(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-600">
+                {POSITIONS.map(p => <option key={p.value} value={p.value}>{p.label} — {p.desc}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Style</label>
+              <select value={bnStyle} onChange={e => setBnStyle(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-600">
+                {STYLES.map(s => <option key={s.value} value={s.value}>{s.label} — {s.desc}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Priority (higher = shown first)</label>
+              <input type="number" value={bnPriority} onChange={e => setBnPriority(e.target.value)} placeholder="0"
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Start Date</label>
+              <input type="date" value={bnStart} onChange={e => setBnStart(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-600" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">End Date</label>
+              <input type="date" value={bnEnd} onChange={e => setBnEnd(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-600" />
+            </div>
+          </div>
+
+          {/* Gradient picker */}
+          <div>
+            <label className="text-xs text-gray-500 mb-2 block">Gradient Color</label>
+            <div className="grid grid-cols-4 gap-2">
+              {GRADIENT_PRESETS.map(g => (
+                <button key={g.value} onClick={() => setBnGrad(g.value)} title={g.label}
+                  className={`h-8 rounded-lg bg-gradient-to-r ${g.value} border-2 transition-all ${bnGrad === g.value ? 'border-white scale-105' : 'border-transparent hover:border-gray-500'}`} />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-1">
+            <button onClick={() => setBannerForm(false)} className="flex-1 py-2.5 rounded-xl bg-gray-800 text-gray-400 text-sm font-semibold hover:bg-gray-700 transition-colors">Cancel</button>
+            <button onClick={saveBanner} disabled={bnSaving}
+              className="flex-1 flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-colors">
+              {bnSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : bnSaved ? <Check className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
+              {bnSaving ? 'Saving…' : bnSaved ? 'Saved!' : editBanner ? 'Update Banner' : 'Create Banner'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {bannersLoad ? (
+        <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-purple-400" /></div>
+      ) : banners.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Layers className="w-10 h-10 text-gray-700 mb-3" /><p className="text-gray-500">No banners yet. Create your first one!</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {banners.map(b => {
+            const expired  = b.endsAt ? new Date(b.endsAt) < new Date() : false
+            const posLabel = POSITIONS.find(p => p.value === b.position)?.label ?? b.position
+            const styleLabel = STYLES.find(s => s.value === b.style)?.label ?? b.style
+            return (
+              <div key={b.id} className={`border rounded-2xl overflow-hidden transition-all ${b.active && !expired ? 'border-gray-700' : 'border-gray-800 opacity-60'}`}>
+                {/* Mini preview */}
+                <div className={`bg-gradient-to-r ${b.gradient} px-4 py-2.5 flex items-center justify-between gap-3`}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    {b.badge && <span className="text-xs font-bold bg-white/20 text-white px-2 py-0.5 rounded-full whitespace-nowrap">{b.badge}</span>}
+                    <span className="text-white text-sm font-bold truncate">{b.title}</span>
+                    {b.subtitle && <span className="text-white/70 text-xs truncate hidden sm:block">{b.subtitle}</span>}
+                  </div>
+                  {b.ctaText && <span className="text-xs font-bold bg-white/20 text-white px-2.5 py-1 rounded-lg whitespace-nowrap">{b.ctaText}</span>}
+                </div>
+                {/* Meta row */}
+                <div className="bg-gray-800/40 px-4 py-3 flex items-center gap-3 flex-wrap">
+                  <span className="text-xs text-gray-400 font-medium">{posLabel}</span>
+                  <span className="text-gray-700">·</span>
+                  <span className="text-xs text-gray-500">{styleLabel}</span>
+                  {b.endsAt && <><span className="text-gray-700">·</span><span className="text-xs text-gray-500">Until {fmt(b.endsAt)}</span></>}
+                  {expired && <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">Expired</span>}
+                  {!b.active && !expired && <span className="text-xs bg-gray-600/30 text-gray-500 px-2 py-0.5 rounded-full">Inactive</span>}
+                  {b.active && !expired && <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">● Live</span>}
+                  <div className="ml-auto flex items-center gap-1.5">
+                    <button onClick={() => openBannerEdit(b)} className="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-400 hover:text-white transition-colors"><Pencil className="w-3 h-3" /></button>
+                    <button onClick={() => toggleBanner(b)} className={`p-1.5 rounded-lg transition-colors ${b.active ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500 hover:bg-gray-600'}`}>
+                      {b.active ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+                    </button>
+                    <button onClick={() => deleteBanner(b.id)} className="p-1.5 rounded-lg bg-gray-700 hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="w-3 h-3" /></button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+
+  // ── Pricing tab ───────────────────────────────────────────────────────────
+  const startEditPrice = (c: ProductConfig) => {
+    setEditingPrice(c.id); setPBase(String(c.basePrice)); setPSale(c.salePrice !== null ? String(c.salePrice) : '')
+  }
+  const savePrice = async (c: ProductConfig) => {
+    setPSaving(true)
+    await fetch(`/api/admin/pricing/${c.id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ basePrice: Number(pBase), salePrice: pSale ? Number(pSale) : null }),
+    })
+    await fetchConfigs(); setPSaving(false); setEditingPrice(null)
+  }
+  const toggleConfig = async (c: ProductConfig) => {
+    await fetch(`/api/admin/pricing/${c.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !c.active }) })
+    await fetchConfigs()
+  }
+
+  const renderPricing = () => (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-extrabold text-white">Pricing</h2>
+        <p className="text-xs text-gray-500 mt-0.5">Edit prices in real-time — changes reflect on the order page instantly</p>
+      </div>
+
+      {configsLoad ? (
+        <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-purple-400" /></div>
+      ) : (
+        <>
+          {/* Website products */}
+          {['website', 'billing'].map(cat => {
+            const list = configs.filter(c => c.category === cat)
+            if (!list.length) return null
+            return (
+              <div key={cat}>
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                  {cat === 'website' ? '🌐 Website Packages' : '🧾 Billing Software'}
+                </h3>
+                <div className="space-y-2">
+                  {list.map(c => {
+                    const editing  = editingPrice === c.id
+                    const discount = c.salePrice ? Math.round((1 - c.salePrice / c.basePrice) * 100) : null
+                    return (
+                      <div key={c.id} className={`bg-gray-800/40 border rounded-xl p-4 transition-all ${c.active ? 'border-gray-700' : 'border-gray-800 opacity-60'}`}>
+                        {editing ? (
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-white mb-2">{c.productName}</p>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <div>
+                                  <label className="text-xs text-gray-500 mb-1 block">Base Price (₹)</label>
+                                  <input type="number" value={pBase} onChange={e => setPBase(e.target.value)} autoFocus
+                                    className="w-32 bg-gray-900 border border-gray-600 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500" />
+                                </div>
+                                <div>
+                                  <label className="text-xs text-gray-500 mb-1 block">Sale Price (₹) — optional</label>
+                                  <input type="number" value={pSale} onChange={e => setPSale(e.target.value)} placeholder="Leave blank to remove"
+                                    className="w-44 bg-gray-900 border border-gray-600 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500" />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 self-end">
+                              <button onClick={() => setEditingPrice(null)} className="px-3 py-1.5 rounded-lg bg-gray-700 text-gray-400 text-xs font-semibold hover:bg-gray-600 transition-colors">Cancel</button>
+                              <button onClick={() => savePrice(c)} disabled={pSaving}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold transition-colors">
+                                {pSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Save
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <p className="text-sm font-semibold text-white truncate">{c.productName}</p>
+                                {discount && <span className="text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded-full font-bold">{discount}% OFF</span>}
+                                {!c.active && <span className="text-xs bg-gray-600/30 text-gray-500 px-1.5 py-0.5 rounded-full">Hidden</span>}
+                              </div>
+                              <div className="flex items-baseline gap-2">
+                                {c.salePrice ? (
+                                  <>
+                                    <span className="text-base font-extrabold text-white">₹{c.salePrice.toLocaleString('en-IN')}</span>
+                                    <span className="text-xs text-gray-600 line-through">₹{c.basePrice.toLocaleString('en-IN')}</span>
+                                  </>
+                                ) : (
+                                  <span className="text-base font-extrabold text-white">₹{c.basePrice.toLocaleString('en-IN')}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <button onClick={() => startEditPrice(c)} className="p-1.5 rounded-lg bg-gray-700 hover:bg-purple-600/20 text-gray-400 hover:text-purple-400 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => toggleConfig(c)} title={c.active ? 'Hide' : 'Show'} className={`p-1.5 rounded-lg transition-colors ${c.active ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500 hover:bg-gray-600'}`}>
+                                {c.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
+    </div>
+  )
+
   // ── Main Render ───────────────────────────────────────────────────────────
   return (
     <div className="flex min-h-screen bg-gray-950">
@@ -982,14 +1588,21 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <nav className="flex-1 p-2.5 space-y-1 overflow-y-auto">
-          {navItems.map(({ id, label, Icon, badge }) => (
-            <button key={id} onClick={() => { setTab(id); setSidebar(false) }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${tab === id ? 'bg-purple-600 text-white' : 'text-gray-500 hover:text-white hover:bg-gray-800'}`}>
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span className="flex-1 text-left">{label}</span>
-              {badge !== undefined && <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${tab === id ? 'bg-white/20' : 'bg-amber-500 text-white'}`}>{badge}</span>}
-            </button>
+        <nav className="flex-1 p-2.5 overflow-y-auto space-y-4">
+          {navSections.map(({ section, items }) => (
+            <div key={section}>
+              <p className="text-[10px] font-bold text-gray-600 tracking-widest px-3 mb-1">{section}</p>
+              <div className="space-y-0.5">
+                {items.map(({ id, label, Icon, badge }) => (
+                  <button key={id} onClick={() => { setTab(id); setSidebar(false) }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${tab === id ? 'bg-purple-600 text-white' : 'text-gray-500 hover:text-white hover:bg-gray-800'}`}>
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="flex-1 text-left">{label}</span>
+                    {badge !== undefined && <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${tab === id ? 'bg-white/20' : 'bg-amber-500 text-white'}`}>{badge}</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
@@ -1023,6 +1636,9 @@ export default function AdminPage() {
           {tab === 'pipeline'  && renderPipeline()}
           {tab === 'customers' && renderCustomers()}
           {tab === 'revenue'   && renderRevenue()}
+          {tab === 'offers'    && renderOffers()}
+          {tab === 'banners'   && renderBanners()}
+          {tab === 'pricing'   && renderPricing()}
           {tab === 'blog'      && renderBlog()}
         </div>
       </main>
